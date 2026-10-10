@@ -1,4 +1,4 @@
-import { toBool, fromBool } from "./index.js";
+import { fromBool } from "./index.js";
 
 /**
  * @typedef {Object} AppUserRecord
@@ -6,20 +6,23 @@ import { toBool, fromBool } from "./index.js";
  * @property {string} fullName
  * @property {string} email
  * @property {"BUSINESS"|"VENDOR"|"COMPLIANCE"|"FACILITIES"} roleCode
+ * @property {"DEPARTMENT"|"VENDOR"|"GLOBAL"} scopeType
  * @property {string|null} entityId
  * @property {string|null} departmentId
  * @property {string|null} vendorId
  * @property {string|null} passwordHash
- * @property {boolean} isActive
- * @property {string} createdAt
+ * @property {"ACTIVE"|"INACTIVE"} status
  */
+
+const SCOPE_FOR_ROLE = {
+  BUSINESS: "DEPARTMENT",
+  VENDOR: "VENDOR",
+  COMPLIANCE: "GLOBAL",
+  FACILITIES: "GLOBAL",
+};
 
 export const AppUser = {
   table: "app_user",
-  columns: [
-    "user_id", "full_name", "email", "role_code", "entity_id",
-    "department_id", "vendor_id", "password_hash", "is_active", "created_at",
-  ],
 
   /** @returns {AppUserRecord|null} */
   fromRow(row) {
@@ -29,27 +32,28 @@ export const AppUser = {
       fullName: row.full_name,
       email: row.email,
       roleCode: row.role_code,
+      scopeType: row.scope_type,
       entityId: row.entity_id,
       departmentId: row.department_id,
       vendorId: row.vendor_id,
       passwordHash: row.password_hash,
-      isActive: toBool(row.is_active),
-      createdAt: row.created_at,
+      status: row.status,
     };
   },
 
-  /** Domain object -> DB row (for inserts/updates). */
+  /** Domain object -> row. Derives scope_type from the role if not supplied. */
   toRow(u) {
     return {
       user_id: u.userId,
       full_name: u.fullName,
       email: u.email,
       role_code: u.roleCode,
+      scope_type: u.scopeType ?? SCOPE_FOR_ROLE[u.roleCode] ?? "GLOBAL",
       entity_id: u.entityId ?? null,
       department_id: u.departmentId ?? null,
       vendor_id: u.vendorId ?? null,
       password_hash: u.passwordHash ?? null,
-      is_active: fromBool(u.isActive ?? true),
+      status: u.status ?? "ACTIVE",
     };
   },
 
@@ -60,9 +64,13 @@ export const AppUser = {
       full_name: u.fullName,
       email: u.email,
       role_code: u.roleCode,
+      scope_type: u.scopeType,
       entity_id: u.entityId,
       department_id: u.departmentId,
       vendor_id: u.vendorId,
     };
   },
+
+  isActive: (u) => u.status === "ACTIVE",
+  scopeForRole: (role) => SCOPE_FOR_ROLE[role] ?? "GLOBAL",
 };

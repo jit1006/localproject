@@ -6,7 +6,7 @@ import { AppUser } from "../models/index.js";
 
 export function authenticate(email, password) {
   const user = userRepo.findByEmail(email);
-  if (!user || !user.isActive || !verifyPassword(password, user.passwordHash)) {
+  if (!user || !AppUser.isActive(user) || !verifyPassword(password, user.passwordHash)) {
     // Uniform message: never reveal whether the email exists.
     throw unauthorized("Invalid email or password");
   }
@@ -26,7 +26,7 @@ export function resolveSession(rawToken) {
   const now = new Date().toISOString();
   if (!row || row.revoked_at || row.expires_at <= now) throw unauthorized("Session expired or invalid");
   const user = userRepo.findById(row.user_id);
-  if (!user || !user.isActive) throw unauthorized("Account is inactive");
+  if (!user || !AppUser.isActive(user)) throw unauthorized("Account is inactive");
   return user;
 }
 
@@ -40,7 +40,7 @@ export function provisionUser(input) {
   const user = {
     ...input,
     passwordHash: hashPassword(input.password),
-    isActive: true,
+    status: "ACTIVE",
   };
   return AppUser.toPublic(userRepo.upsert(user));
 }

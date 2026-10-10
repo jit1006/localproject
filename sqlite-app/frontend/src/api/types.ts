@@ -16,7 +16,10 @@ export interface Carton {
   department_id: string;
   document_type: string;
   archival_policy: string;
-  assigned_vendor_id: string;
+  assigned_vendor_id: string | null;
+  current_location_id?: string | null;
+  current_status: string;
+  legal_hold_flag: boolean;
   retention_trigger_date?: string | null;
   declared_file_count?: number | null;
   barcode?: string | null;
@@ -39,12 +42,17 @@ export interface DashboardSummary {
 }
 
 export interface CartonHistory {
-  state: Record<string, unknown> | null;
+  state: {
+    cartonId: string;
+    status: string;
+    currentLocationId: string | null;
+    legalHoldFlag: boolean;
+  } | null;
   events: {
-    eventId: number;
+    eventId: string;
     eventType: string;
     occurredAt: string | null;
-    actorRole: string;
+    actorId: string | null;
     resultingStatus: string | null;
   }[];
 }
