@@ -5,10 +5,13 @@ movement history, retention eligibility, legal holds, and vendor-evidence
 reconciliation.
 
 This is the **Node.js + SQLite** implementation. It is self-contained under
-`sqlite-app/` and is independent of the Python/PostgreSQL variant. The data model
-is translated from the authoritative PostgreSQL schema in
-[`PRMS_Database_Complete/`](../PRMS_Database_Complete/) to SQLite — see
-[`docs/schema-translation.md`](docs/schema-translation.md) for every change and why.
+`sqlite-app/` and is independent of the Python/PostgreSQL variant. It uses a
+**consolidated 16-table schema** (ref_lookup + org_unit + a denormalized carton,
+with invoice/import/reconciliation-run fields inlined) derived from the
+authoritative PostgreSQL model in
+[`PRMS_Database_Complete/`](../PRMS_Database_Complete/) — see
+[`docs/schema-translation.md`](docs/schema-translation.md) for the full
+table-by-table mapping and the invariants moved into the service layer.
 
 ## Highlights
 
@@ -29,11 +32,13 @@ sqlite-app/
 ├── backend/
 │   ├── src/
 │   │   ├── db/
-│   │   │   ├── schema.sql        SQLite-translated schema (37 tables + view)
+│   │   │   ├── schema.sql        consolidated 16-table schema + retention view
 │   │   │   ├── seed.sql          reference seed
 │   │   │   ├── init.js           applies schema + seed
 │   │   │   └── connection.js     node:sqlite connection + tx() helper
-│   │   ├── models/               row <-> domain mappers + JSDoc typedefs
+│   │   ├── models/               row <-> domain mappers (app_user, carton,
+│   │   │                         file_index, request, event_log, legal_hold,
+│   │   │                         reconciliation) + JSDoc typedefs
 │   │   ├── repositories/         all SQL lives here
 │   │   ├── services/             business logic, permissions, event engine
 │   │   ├── http/                 zero-dep router + route registration
@@ -110,7 +115,7 @@ npm test
 
 In development this stack was run against real SQLite:
 
-- `schema.sql` + `seed.sql` apply cleanly (37 tables, retention view, integrity OK).
+- `schema.sql` + `seed.sql` apply cleanly (16 tables, retention view, integrity OK).
 - `npm run db:init`, `seed:users`, and `npm start` all run; `/health` reports `database: up`.
 - Full lifecycle exercised over HTTP: login (all roles) → register carton →
   pickup → vendor collect → **warehouse receipt (In Storage)** → retrieval/return →

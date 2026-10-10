@@ -1,35 +1,35 @@
+import { randomUUID } from "node:crypto";
 import { conflict, forbidden, notFound } from "../errors.js";
 import { tx } from "../db/connection.js";
-import { holdRepo, eventRepo } from "../repositories/index.js";
+import { holdRepo, cartonRepo } from "../repositories/index.js";
 import { appendCartonEvent } from "./event_engine.js";
 import { nowIso } from "../models/index.js";
 
 export function applyHold(user, { cartonId, holdId, matterReference, reason }) {
   if (user.roleCode !== "COMPLIANCE") throw forbidden("Only Compliance can apply legal holds");
   if (holdRepo.findById(holdId)) throw conflict(`Hold ${holdId} already exists`);
+  if (!cartonRepo.findById(cartonId)) throw notFound(`Carton ${cartonId} not found`);
 
   const now = nowIso();
   return tx(() => {
-    const { eventId } = appendCartonEvent({
+    appendCartonEvent({
       cartonId,
       eventType: "LEGAL_HOLD_APPLIED",
       actorUserId: user.userId,
-      actorRole: user.roleCode,
       occurredAt: now,
       idempotencyKey: `hold-apply:${holdId}`,
-      payload: { matterReference, reason },
+      remarks: `matter=${matterReference}`,
     });
     const hold = holdRepo.insert({
       holdId,
       cartonId,
       matterReference,
-      reason,
+      holdReason: reason,
       raisedBy: user.userId,
-      startsAt: now,
-      appliedEventId: eventId,
+      holdStartDate: now,
     });
-    const state = eventRepo.getState(cartonId);
-    if (state) eventRepo.updateState(cartonId, { active_hold_count: state.activeHoldCount + 1 });
+    // Keep the denormalized flag in step with active holds.
+    cartonRepo.updateState(cartonId, { legal_hold_flag: 1 });
     return hold;
   });
 }
@@ -38,31 +38,26 @@ export function releaseHold(user, holdId, reason) {
   if (user.roleCode !== "COMPLIANCE") throw forbidden("Only Compliance can release legal holds");
   const hold = holdRepo.findById(holdId);
   if (!hold) throw notFound(`Hold ${holdId} not found`);
-  if (hold.releasedAt) throw conflict("Hold already released");
+  if (hold.holdStatus === "RELEASED") throw conflict("Hold already released");
 
   const now = nowIso();
   return tx(() => {
-    const { eventId } = appendCartonEvent({
+    appendCartonEvent({
       cartonId: hold.cartonId,
       eventType: "LEGAL_HOLD_RELEASED",
       actorUserId: user.userId,
-      actorRole: user.roleCode,
       occurredAt: now,
       idempotencyKey: `hold-release:${holdId}`,
-      payload: { reason },
+      remarks: reason,
     });
-    const released = holdRepo.release(holdId, {
-      releasedAt: now,
-      releasedBy: user.userId,
-      releaseReason: reason,
-      releasedEventId: eventId,
-    });
-    const state = eventRepo.getState(hold.cartonId);
-    if (state && state.activeHoldCount > 0) {
-      eventRepo.updateState(hold.cartonId, { active_hold_count: state.activeHoldCount - 1 });
+    const released = holdRepo.release(holdId, now);
+    // Clear the flag only when no other active hold remains on the carton.
+    if (holdRepo.activeCount(hold.cartonId) === 0) {
+      cartonRepo.updateState(hold.cartonId, { legal_hold_flag: 0 });
     }
     return released;
   });
 }
 
 export const listHolds = (activeOnly) => holdRepo.list(activeOnly);
+export const newHoldId = () => `H-${randomUUID().slice(0, 8)}`;

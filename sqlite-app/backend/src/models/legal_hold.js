@@ -3,13 +3,11 @@
  * @property {string} holdId
  * @property {string} cartonId
  * @property {string} matterReference
- * @property {string} reason
+ * @property {string} holdReason
  * @property {string|null} raisedBy
- * @property {string} startsAt
- * @property {number} appliedEventId
- * @property {string|null} releasedAt
- * @property {string|null} releasedBy
- * @property {string|null} releaseReason
+ * @property {string} holdStartDate
+ * @property {string|null} holdReleaseDate
+ * @property {"ACTIVE"|"RELEASED"} holdStatus
  */
 
 export const LegalHold = {
@@ -22,13 +20,11 @@ export const LegalHold = {
       holdId: row.hold_id,
       cartonId: row.carton_id,
       matterReference: row.matter_reference,
-      reason: row.reason,
+      holdReason: row.hold_reason,
       raisedBy: row.raised_by,
-      startsAt: row.starts_at,
-      appliedEventId: row.applied_event_id,
-      releasedAt: row.released_at,
-      releasedBy: row.released_by,
-      releaseReason: row.release_reason,
+      holdStartDate: row.hold_start_date,
+      holdReleaseDate: row.hold_release_date,
+      holdStatus: row.hold_status,
     };
   },
 
@@ -37,9 +33,10 @@ export const LegalHold = {
       hold_id: h.holdId,
       carton_id: h.cartonId,
       matter_reference: h.matterReference,
-      reason: h.reason,
-      starts_at: h.startsAt,
-      released_at: h.releasedAt,
+      hold_reason: h.holdReason,
+      hold_start_date: h.holdStartDate,
+      hold_release_date: h.holdReleaseDate,
+      hold_status: h.holdStatus,
     };
   },
 };

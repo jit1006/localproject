@@ -78,8 +78,8 @@ export function CartonDetailPage() {
         {history?.state ? (
           <dl className="detail">
             <dt>Status</dt><dd>{String(history.state.status)}</dd>
-            <dt>Custody</dt><dd>{String(history.state.custody)}</dd>
-            <dt>Active holds</dt><dd>{String(history.state.activeHoldCount)}</dd>
+            <dt>Location</dt><dd>{String(history.state.currentLocationId ?? "—")}</dd>
+            <dt>Legal hold</dt><dd>{history.state.legalHoldFlag ? "Yes" : "No"}</dd>
           </dl>
         ) : (
           <p className="empty">No state yet.</p>
@@ -95,7 +95,7 @@ export function CartonDetailPage() {
               <tr key={e.eventId}>
                 <td>{e.occurredAt?.slice(0, 19).replace("T", " ")}</td>
                 <td>{e.eventType}</td>
-                <td>{e.actorRole}</td>
+                <td>{e.actorId ?? "—"}</td>
                 <td>{e.resultingStatus ?? "—"}</td>
               </tr>
             ))}

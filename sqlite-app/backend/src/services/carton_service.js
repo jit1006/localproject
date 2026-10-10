@@ -19,7 +19,9 @@ export function registerCarton(user, input) {
       cartonCreatedDate: input.cartonCreatedDate,
       retentionTriggerDate: input.retentionTriggerDate ?? null,
       declaredFileCount: input.declaredFileCount ?? null,
-      assignedVendorId: input.assignedVendorId,
+      assignedVendorId: input.assignedVendorId ?? null,
+      currentStatus: "Created",
+      legalHoldFlag: false,
       barcode: input.barcode ?? null,
       remarks: input.remarks ?? null,
     });
@@ -27,10 +29,9 @@ export function registerCarton(user, input) {
       cartonId: carton.cartonId,
       eventType: "CARTON_CREATED",
       actorUserId: user.userId,
-      actorRole: user.roleCode,
       occurredAt: nowIso(),
       idempotencyKey: `create:${carton.cartonId}`,
-      payload: { documentType: input.documentType, archivalPolicy: input.archivalPolicy },
+      remarks: `document_type=${input.documentType}`,
     });
     return carton;
   });
@@ -47,6 +48,14 @@ export function indexFile(user, carton, input) {
       fileDescription: input.fileDescription ?? null,
       documentYear: input.documentYear ?? null,
       containsPii: input.containsPii ?? true,
+    });
+    appendCartonEvent({
+      cartonId: carton.cartonId,
+      eventType: "FILE_INDEXED",
+      actorUserId: user.userId,
+      occurredAt: nowIso(),
+      idempotencyKey: `file:${input.fileId}`,
+      remarks: `file_id=${input.fileId}`,
     });
     return { fileId: input.fileId };
   });

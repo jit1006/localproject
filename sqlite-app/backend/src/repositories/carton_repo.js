@@ -1,5 +1,5 @@
 import { db } from "../db/connection.js";
-import { Carton, FileRecord } from "../models/index.js";
+import { Carton, FileIndex } from "../models/index.js";
 
 export function findById(cartonId) {
   const row = db.prepare("SELECT * FROM carton WHERE carton_id = ?").get(cartonId);
@@ -7,32 +7,33 @@ export function findById(cartonId) {
 }
 
 export function insert(c) {
+  const r = Carton.toRow(c);
   db.prepare(
     `INSERT INTO carton (carton_id, entity_id, department_id, owner_user_id, document_type,
         archival_policy, carton_created_date, retention_trigger_date, declared_file_count,
-        assigned_vendor_id, barcode, remarks)
-     VALUES (@cartonId, @entityId, @departmentId, @ownerUserId, @documentType, @archivalPolicy,
-        @cartonCreatedDate, @retentionTriggerDate, @declaredFileCount, @assignedVendorId, @barcode, @remarks)`,
-  ).run({
-    cartonId: c.cartonId,
-    entityId: c.entityId,
-    departmentId: c.departmentId,
-    ownerUserId: c.ownerUserId,
-    documentType: c.documentType,
-    archivalPolicy: c.archivalPolicy,
-    cartonCreatedDate: c.cartonCreatedDate,
-    retentionTriggerDate: c.retentionTriggerDate ?? null,
-    declaredFileCount: c.declaredFileCount ?? null,
-    assignedVendorId: c.assignedVendorId,
-    barcode: c.barcode ?? null,
-    remarks: c.remarks ?? null,
-  });
+        assigned_vendor_id, current_location_id, current_status, legal_hold_flag, barcode, remarks)
+     VALUES (@carton_id, @entity_id, @department_id, @owner_user_id, @document_type, @archival_policy,
+        @carton_created_date, @retention_trigger_date, @declared_file_count, @assigned_vendor_id,
+        @current_location_id, @current_status, @legal_hold_flag, @barcode, @remarks)`,
+  ).run(r);
   return findById(c.cartonId);
+}
+
+/** Patch the denormalized carton state (status/location/hold). */
+export function updateState(cartonId, fields) {
+  const sets = [];
+  const params = { cartonId };
+  for (const [k, v] of Object.entries(fields)) {
+    sets.push(`${k} = @${k}`);
+    params[k] = v;
+  }
+  if (!sets.length) return;
+  db.prepare(`UPDATE carton SET ${sets.join(", ")} WHERE carton_id = @cartonId`).run(params);
 }
 
 export function insertFile(f) {
   db.prepare(
-    `INSERT INTO file_record (file_id, carton_id, file_ref, document_type, file_description, document_year, contains_pii)
+    `INSERT INTO file_index (file_id, carton_id, file_ref, document_type, file_description, document_year, contains_pii)
      VALUES (@fileId, @cartonId, @fileRef, @documentType, @fileDescription, @documentYear, @containsPii)`,
   ).run({
     fileId: f.fileId,
@@ -46,44 +47,46 @@ export function insertFile(f) {
 }
 
 export function listFiles(cartonId) {
-  const rows = db.prepare("SELECT * FROM file_record WHERE carton_id = ? ORDER BY file_id").all(cartonId);
-  return rows.map(FileRecord.fromRow);
+  return db
+    .prepare("SELECT * FROM file_index WHERE carton_id = ? ORDER BY file_id")
+    .all(cartonId)
+    .map(FileIndex.fromRow);
 }
 
 export function fileExists(fileId) {
-  return !!db.prepare("SELECT 1 FROM file_record WHERE file_id = ?").get(fileId);
+  return !!db.prepare("SELECT 1 FROM file_index WHERE file_id = ?").get(fileId);
 }
 
 export function retention(cartonId) {
-  return db
-    .prepare(
-      `SELECT carton_id, retention_trigger_date, policy_id, policy_revision, retention_years,
-              destruction_due_on, calculation_status
-       FROM carton_retention WHERE carton_id = ?`,
-    )
-    .get(cartonId) ?? null;
+  return (
+    db
+      .prepare(
+        `SELECT carton_id, retention_trigger_date, policy_code, retention_years,
+                destruction_due_on, calculation_status
+         FROM carton_retention WHERE carton_id = ?`,
+      )
+      .get(cartonId) ?? null
+  );
 }
 
-/** Dashboard aggregation scoped by role. */
+// Dashboard aggregates scoped by role (status now lives on carton).
 export function countsByStatus({ role, entityId, departmentId, vendorId }) {
   return db
     .prepare(
-      `SELECT cs.status_code, count(*) AS n
-       FROM carton_state cs JOIN carton c ON c.carton_id = cs.carton_id
+      `SELECT current_status AS status_code, count(*) AS n FROM carton c
        WHERE (@role <> 'BUSINESS' OR (c.entity_id = @entityId AND c.department_id = @departmentId))
          AND (@role <> 'VENDOR'   OR c.assigned_vendor_id = @vendorId)
-       GROUP BY cs.status_code ORDER BY n DESC`,
+       GROUP BY current_status ORDER BY n DESC`,
     )
     .all({ role, entityId: entityId ?? null, departmentId: departmentId ?? null, vendorId: vendorId ?? null });
 }
 
 export function totalCartons({ role, entityId, departmentId, vendorId }) {
-  const row = db
+  return db
     .prepare(
       `SELECT count(*) AS n FROM carton c
        WHERE (@role <> 'BUSINESS' OR (c.entity_id = @entityId AND c.department_id = @departmentId))
          AND (@role <> 'VENDOR'   OR c.assigned_vendor_id = @vendorId)`,
     )
-    .get({ role, entityId: entityId ?? null, departmentId: departmentId ?? null, vendorId: vendorId ?? null });
-  return row.n;
+    .get({ role, entityId: entityId ?? null, departmentId: departmentId ?? null, vendorId: vendorId ?? null }).n;
 }
