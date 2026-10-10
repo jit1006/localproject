@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { api, ApiError } from "../api/client";
 
 interface Run {
-  run_id: number;
+  run_id: string;
   run_kind: string;
-  scope_key: string;
-  status: string;
-  started_at: string | null;
+  run_started_at: string | null;
+  run_status: string;
+  finding_count: number;
 }
 
 export function ReconciliationPage() {
@@ -47,13 +47,14 @@ export function ReconciliationPage() {
       </form>
 
       <table className="data-table">
-        <thead><tr><th>Run</th><th>Kind</th><th>Scope</th><th>Status</th><th>Started</th></tr></thead>
+        <thead><tr><th>Run</th><th>Kind</th><th>Status</th><th>Findings</th><th>Started</th></tr></thead>
         <tbody>
           {runs.length === 0 && <tr><td colSpan={5} className="empty">No runs yet.</td></tr>}
           {runs.map((r) => (
             <tr key={r.run_id}>
-              <td>{r.run_id}</td><td>{r.run_kind}</td><td>{r.scope_key}</td><td>{r.status}</td>
-              <td>{r.started_at?.slice(0, 19).replace("T", " ")}</td>
+              <td title={r.run_id}>{r.run_id.slice(0, 8)}…</td>
+              <td>{r.run_kind}</td><td>{r.run_status}</td><td>{r.finding_count}</td>
+              <td>{r.run_started_at?.slice(0, 19).replace("T", " ")}</td>
             </tr>
           ))}
         </tbody>

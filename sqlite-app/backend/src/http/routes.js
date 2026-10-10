@@ -9,8 +9,8 @@ import * as requestService from "../services/request_service.js";
 import * as holdService from "../services/hold_service.js";
 import * as reconService from "../services/recon_service.js";
 import * as scope from "../services/scope.js";
-import { cartonRepo, eventRepo } from "../repositories/index.js";
-import { AppUser, Carton, ServiceRequest, CartonState, LegalHold, ReconciliationRun, ExceptionCase } from "../models/index.js";
+import { cartonRepo, eventRepo, requestRepo } from "../repositories/index.js";
+import { AppUser, Carton, Request, LegalHold, ReconException } from "../models/index.js";
 import { db } from "../db/connection.js";
 
 export const router = new Router();
@@ -116,12 +116,17 @@ router.get("/api/v1/cartons/:cartonId/files", (ctx) => {
 
 router.get("/api/v1/cartons/:cartonId/history", (ctx) => {
   requireUser(ctx);
-  getCartonScoped(ctx, ctx.params.cartonId);
-  const state = eventRepo.getState(ctx.params.cartonId);
+  const carton = getCartonScoped(ctx, ctx.params.cartonId);
+  // State is denormalized onto the carton row in the 16-table design.
   return {
     status: 200,
     body: {
-      state: state ? CartonState.toPublic(state) : null,
+      state: {
+        cartonId: carton.cartonId,
+        status: carton.currentStatus,
+        currentLocationId: carton.currentLocationId,
+        legalHoldFlag: carton.legalHoldFlag,
+      },
       events: eventRepo.history(ctx.params.cartonId),
     },
   };
@@ -143,18 +148,18 @@ router.post("/api/v1/requests", (ctx) => {
     requestId: ctx.body.request_id,
     requestType: ctx.body.request_type,
   });
-  return { status: 201, body: ServiceRequest.toPublic(req) };
+  return { status: 201, body: Request.toPublic(req) };
 });
 
 router.get("/api/v1/requests/queue", (ctx) => {
   const user = requireRoles(ctx, "VENDOR");
-  return { status: 200, body: requestService.listVendorQueue(user.vendorId).map(ServiceRequest.toPublic) };
+  return { status: 200, body: requestService.listVendorQueue(user.vendorId).map(Request.toPublic) };
 });
 
 const vendorAction = (eventType, markCompleted) => (ctx) => {
   const user = requireRoles(ctx, "VENDOR");
   const req = requestService.vendorAction(user, { requestId: ctx.params.requestId, eventType, markCompleted });
-  return { status: 200, body: ServiceRequest.toPublic(req) };
+  return { status: 200, body: Request.toPublic(req) };
 };
 router.post("/api/v1/requests/:requestId/acknowledge", vendorAction("REQUEST_ACKNOWLEDGED", false));
 router.post("/api/v1/requests/:requestId/collect", vendorAction("PICKED_UP_BY_VENDOR", false));
@@ -163,11 +168,11 @@ router.post("/api/v1/requests/:requestId/deliver", vendorAction("DELIVERED_TO_BU
 
 router.post("/api/v1/requests/:requestId/approve", (ctx) => {
   const user = requireRoles(ctx, "COMPLIANCE");
-  return { status: 200, body: ServiceRequest.toPublic(requestService.approveDestruction(user, ctx.params.requestId)) };
+  return { status: 200, body: Request.toPublic(requestService.approveDestruction(user, ctx.params.requestId)) };
 });
 router.post("/api/v1/requests/:requestId/destroy", (ctx) => {
   const user = requireRoles(ctx, "VENDOR");
-  return { status: 200, body: ServiceRequest.toPublic(requestService.executeDestruction(user, ctx.params.requestId)) };
+  return { status: 200, body: Request.toPublic(requestService.executeDestruction(user, ctx.params.requestId)) };
 });
 
 // --- holds ---
@@ -187,7 +192,7 @@ router.post("/api/v1/holds", (ctx) => {
 router.post("/api/v1/holds/:holdId/release", (ctx) => {
   const user = requireRoles(ctx, "COMPLIANCE");
   const hold = holdService.releaseHold(user, ctx.params.holdId, ctx.body.reason);
-  return { status: 200, body: { hold_id: hold.holdId, released_at: hold.releasedAt } };
+  return { status: 200, body: { hold_id: hold.holdId, hold_release_date: hold.holdReleaseDate } };
 });
 
 // --- reconciliation & exceptions ---
@@ -198,11 +203,11 @@ router.post("/api/v1/reconciliations", (ctx) => {
 });
 router.get("/api/v1/reconciliations", (ctx) => {
   requireRoles(ctx, "FACILITIES");
-  return { status: 200, body: reconService.listRuns().map(ReconciliationRun.toPublic) };
+  return { status: 200, body: reconService.listRuns().map((x)=>x) };
 });
 router.get("/api/v1/exceptions", (ctx) => {
   const user = requireUser(ctx);
-  return { status: 200, body: reconService.listExceptions(user).map(ExceptionCase.toPublic) };
+  return { status: 200, body: reconService.listExceptions(user).map(ReconException.toPublic) };
 });
 
 // --- dashboard & reference ---
@@ -214,7 +219,7 @@ router.get("/api/v1/dashboard", (ctx) => {
     body: {
       role: user.roleCode,
       totalCartons: cartonRepo.totalCartons(scopeArgs),
-      totalRequests: countRequests(user),
+      totalRequests: requestRepo.countForUser({ role: user.roleCode, userId: user.userId, vendorId: user.vendorId }),
       cartonsByStatus: cartonRepo.countsByStatus(scopeArgs),
     },
   };
@@ -225,10 +230,4 @@ router.get("/api/v1/reference-data/vendors", (ctx) => {
   return { status: 200, body: rows };
 });
 
-function countRequests(user) {
-  if (user.roleCode === "BUSINESS")
-    return db.prepare("SELECT count(*) n FROM service_request WHERE raised_by = ?").get(user.userId).n;
-  if (user.roleCode === "VENDOR")
-    return db.prepare("SELECT count(*) n FROM service_request WHERE vendor_id = ?").get(user.vendorId).n;
-  return db.prepare("SELECT count(*) n FROM service_request").get().n;
-}
+

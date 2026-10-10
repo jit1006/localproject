@@ -1,7 +1,7 @@
 import { toBool } from "./index.js";
 
 /**
- * @typedef {Object} FileRecordRecord
+ * @typedef {Object} FileIndexRecord
  * @property {string} fileId
  * @property {string} cartonId
  * @property {string} fileRef
@@ -11,10 +11,10 @@ import { toBool } from "./index.js";
  * @property {boolean} containsPii
  */
 
-export const FileRecord = {
-  table: "file_record",
+export const FileIndex = {
+  table: "file_index",
 
-  /** @returns {FileRecordRecord|null} */
+  /** @returns {FileIndexRecord|null} */
   fromRow(row) {
     if (!row) return null;
     return {

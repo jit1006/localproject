@@ -1,6 +1,6 @@
 import { conflict, forbidden, notFound, unprocessable } from "../errors.js";
 import { tx } from "../db/connection.js";
-import { requestRepo, holdRepo, eventRepo } from "../repositories/index.js";
+import { requestRepo, holdRepo, cartonRepo } from "../repositories/index.js";
 import { appendCartonEvent } from "./event_engine.js";
 import * as scope from "./scope.js";
 import { nowIso } from "../models/index.js";
@@ -23,22 +23,20 @@ export function raiseRequest(user, carton, { requestId, requestType }) {
   return tx(() => {
     const req = requestRepo.insert({
       requestId,
-      cartonId: carton.cartonId,
       requestType,
-      vendorId: carton.assignedVendorId,
+      cartonId: carton.cartonId,
       raisedBy: user.userId,
-      raisedAt: now,
+      raisedOn: now,
+      vendorId: carton.assignedVendorId,
       requestStatus: "Open",
     });
     appendCartonEvent({
       cartonId: carton.cartonId,
       eventType: REQUEST_EVENT[requestType],
       actorUserId: user.userId,
-      actorRole: user.roleCode,
       occurredAt: now,
       idempotencyKey: `request:${requestId}`,
       requestId,
-      payload: { requestType },
     });
     return req;
   });
@@ -59,15 +57,14 @@ export function vendorAction(user, { requestId, eventType, markCompleted }) {
       cartonId: req.cartonId,
       eventType,
       actorUserId: user.userId,
-      actorRole: user.roleCode,
       occurredAt: now,
       idempotencyKey: `${eventType}:${requestId}`,
       requestId,
     });
     const fields = { request_status: markCompleted ? "Completed" : "In Progress" };
-    if (!req.vendorAckAt) fields.vendor_ack_at = now;
-    if (markCompleted) fields.completed_at = now;
-    return requestRepo.setStatus(requestId, fields);
+    if (!req.vendorAckOn) fields.vendor_ack_on = now;
+    if (markCompleted) fields.completed_on = now;
+    return requestRepo.setFields(requestId, fields);
   });
 }
 
@@ -85,14 +82,13 @@ export function approveDestruction(user, requestId) {
       cartonId: req.cartonId,
       eventType: "DESTRUCTION_APPROVED",
       actorUserId: user.userId,
-      actorRole: user.roleCode,
       occurredAt: now,
       idempotencyKey: `approve:${requestId}`,
       requestId,
     });
-    return requestRepo.setStatus(requestId, {
+    return requestRepo.setFields(requestId, {
       approved_by: user.userId,
-      approved_at: now,
+      approved_on: now,
       request_status: "In Progress",
     });
   });
@@ -102,12 +98,13 @@ export function executeDestruction(user, requestId) {
   const req = loadRequest(requestId);
   scope.assertCanActOnRequest(user, req);
   if (!req.approvedBy) throw conflict("Destruction has not been approved");
-  // Re-check at execution: a hold applied AFTER approval still blocks.
   if (holdRepo.activeForCarton(req.cartonId)) {
     throw conflict("Carton is under an active legal hold; destruction blocked at execution");
   }
-  const state = eventRepo.getState(req.cartonId);
-  if (state && state.custody !== "WAREHOUSE") throw conflict("Carton must be in warehouse custody to be destroyed");
+  const carton = cartonRepo.findById(req.cartonId);
+  if (carton && carton.currentStatus !== "Approved for Destruction") {
+    throw conflict("Carton must be approved for destruction before execution");
+  }
 
   const now = nowIso();
   return tx(() => {
@@ -115,12 +112,11 @@ export function executeDestruction(user, requestId) {
       cartonId: req.cartonId,
       eventType: "DESTROYED",
       actorUserId: user.userId,
-      actorRole: user.roleCode,
       occurredAt: now,
       idempotencyKey: `destroy:${requestId}`,
       requestId,
     });
-    return requestRepo.setStatus(requestId, { request_status: "Completed", completed_at: now });
+    return requestRepo.setFields(requestId, { request_status: "Completed", completed_on: now });
   });
 }
 

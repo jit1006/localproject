@@ -1,31 +1,155 @@
--- Reference seed (SQLite) — derived from the supplied workbook; no operational
--- records or passwords. Apply once after schema.sql. Rate effective_to is EXCLUSIVE.
+-- Reference seed (SQLite) for the 16-table schema. Apply once after schema.sql.
+-- All reference vocabularies live in ref_lookup, keyed by (lookup_type, code).
 PRAGMA foreign_keys = ON;
 
-INSERT INTO business_entity (entity_id, entity_name) VALUES
-  ('ENT-BRN','Branch Banking'), ('ENT-MF','Mutual Fund'), ('ENT-GCC','GCC');
+-- ROLES ----------------------------------------------------------------------
+INSERT INTO ref_lookup (lookup_type, code, name, meaning, attrs_json) VALUES
+  ('ROLE','BUSINESS','Business User','Owns entity/department scope', json('{"scope_type":"DEPARTMENT"}')),
+  ('ROLE','VENDOR','Vendor User','Owns vendor code scope', json('{"scope_type":"VENDOR"}')),
+  ('ROLE','COMPLIANCE','Compliance Officer','Cross-entity compliance', json('{"scope_type":"GLOBAL"}')),
+  ('ROLE','FACILITIES','Facilities Team','Cross-entity ops/finance/admin', json('{"scope_type":"GLOBAL"}'));
 
-INSERT INTO department (department_id, entity_id, department_name) VALUES
-  ('DEP-BRN-DEL','ENT-BRN','Delhi Branch'),
-  ('DEP-BRN-PUN','ENT-BRN','Pune Branch'),
-  ('DEP-BRN-MUM','ENT-BRN','Mumbai Branch'),
-  ('DEP-BRN-KOL','ENT-BRN','Kolkata Branch'),
-  ('DEP-BRN-CHE','ENT-BRN','Chennai Branch'),
-  ('DEP-MF-OPS','ENT-MF','MF Operations'),
-  ('DEP-MF-INV','ENT-MF','Investor Services'),
-  ('DEP-MF-CMP','ENT-MF','MF Compliance'),
-  ('DEP-GCC-TRP','ENT-GCC','Transport'),
-  ('DEP-GCC-RE','ENT-GCC','Real Estate'),
-  ('DEP-GCC-AFMG','ENT-GCC','AFMG'),
-  ('DEP-GCC-AP','ENT-GCC','Accounts Payable'),
-  ('DEP-GCC-HR','ENT-GCC','Human Resources');
+-- SCOPE TYPES ----------------------------------------------------------------
+INSERT INTO ref_lookup (lookup_type, code, name) VALUES
+  ('SCOPE_TYPE','DEPARTMENT','Department-scoped'),
+  ('SCOPE_TYPE','VENDOR','Vendor-scoped'),
+  ('SCOPE_TYPE','GLOBAL','Cross-entity');
 
+-- DOC TYPES (numeric_value = base retention years; attrs_json = trigger desc) -
+INSERT INTO ref_lookup (lookup_type, code, name, meaning, numeric_value, attrs_json) VALUES
+  ('DOC_TYPE','Client KYC','Client KYC',NULL,8, json('{"trigger":"Relationship closure date"}')),
+  ('DOC_TYPE','Loan Agreements','Loan Agreements',NULL,10, json('{"trigger":"Loan closure date"}')),
+  ('DOC_TYPE','Other Agreements and Vendor Data','Other Agreements and Vendor Data',NULL,7, json('{"trigger":"Contract end date"}')),
+  ('DOC_TYPE','Vendor Onboarding','Vendor Onboarding',NULL,7, json('{"trigger":"Onboarding completion date"}')),
+  ('DOC_TYPE','Audit Reports','Audit Reports',NULL,10, json('{"trigger":"Report issue date"}')),
+  ('DOC_TYPE','Invoices','Invoices',NULL,8, json('{"trigger":"Financial year end"}')),
+  ('DOC_TYPE','Misc Documents','Misc Documents',NULL,5, json('{"trigger":"Carton creation date"}'));
+
+-- ARCHIVAL POLICIES ----------------------------------------------------------
+INSERT INTO ref_lookup (lookup_type, code, name) VALUES
+  ('ARCHIVAL_POLICY','Banking','Banking'),
+  ('ARCHIVAL_POLICY','Country Specific','Country Specific'),
+  ('ARCHIVAL_POLICY','Standard','Standard');
+
+-- RETENTION POLICIES: code = "<DOC_TYPE>|<ARCHIVAL_POLICY>", numeric_value = years
+INSERT INTO ref_lookup (lookup_type, code, numeric_value) VALUES
+  ('RETENTION_POLICY','Client KYC|Standard',8),
+  ('RETENTION_POLICY','Client KYC|Country Specific',10),
+  ('RETENTION_POLICY','Client KYC|Banking',10),
+  ('RETENTION_POLICY','Loan Agreements|Standard',10),
+  ('RETENTION_POLICY','Loan Agreements|Country Specific',12),
+  ('RETENTION_POLICY','Loan Agreements|Banking',10),
+  ('RETENTION_POLICY','Other Agreements and Vendor Data|Standard',7),
+  ('RETENTION_POLICY','Other Agreements and Vendor Data|Country Specific',9),
+  ('RETENTION_POLICY','Other Agreements and Vendor Data|Banking',10),
+  ('RETENTION_POLICY','Vendor Onboarding|Standard',7),
+  ('RETENTION_POLICY','Vendor Onboarding|Country Specific',9),
+  ('RETENTION_POLICY','Vendor Onboarding|Banking',10),
+  ('RETENTION_POLICY','Audit Reports|Standard',10),
+  ('RETENTION_POLICY','Audit Reports|Country Specific',12),
+  ('RETENTION_POLICY','Audit Reports|Banking',10),
+  ('RETENTION_POLICY','Invoices|Standard',8),
+  ('RETENTION_POLICY','Invoices|Country Specific',10),
+  ('RETENTION_POLICY','Invoices|Banking',10),
+  ('RETENTION_POLICY','Misc Documents|Standard',5),
+  ('RETENTION_POLICY','Misc Documents|Country Specific',7),
+  ('RETENTION_POLICY','Misc Documents|Banking',10);
+
+-- CARTON STATUSES (attrs_json.is_terminal) -----------------------------------
+INSERT INTO ref_lookup (lookup_type, code, meaning, attrs_json) VALUES
+  ('CARTON_STATUS','Created','Carton registered; not yet collected', json('{"is_terminal":false}')),
+  ('CARTON_STATUS','Pickup Requested','Pickup raised, awaiting vendor', json('{"is_terminal":false}')),
+  ('CARTON_STATUS','In Transit to Vendor','Collected, not yet receipted', json('{"is_terminal":false}')),
+  ('CARTON_STATUS','In Storage','Held at vendor warehouse', json('{"is_terminal":false}')),
+  ('CARTON_STATUS','Retrieval Requested','Retrieval raised, awaiting delivery', json('{"is_terminal":false}')),
+  ('CARTON_STATUS','With Business','Physically with the department', json('{"is_terminal":false}')),
+  ('CARTON_STATUS','Return Requested','Return to vendor raised', json('{"is_terminal":false}')),
+  ('CARTON_STATUS','Destruction Requested','Awaiting approval', json('{"is_terminal":false}')),
+  ('CARTON_STATUS','Approved for Destruction','Approved, awaiting execution', json('{"is_terminal":false}')),
+  ('CARTON_STATUS','Destroyed','Terminal; certificate issued', json('{"is_terminal":true}')),
+  ('CARTON_STATUS','Missing','Exception state from reconciliation', json('{"is_terminal":false}'));
+
+-- REQUEST STATUSES -----------------------------------------------------------
+INSERT INTO ref_lookup (lookup_type, code) VALUES
+  ('REQUEST_STATUS','Open'),('REQUEST_STATUS','In Progress'),('REQUEST_STATUS','Completed'),
+  ('REQUEST_STATUS','Rejected'),('REQUEST_STATUS','Cancelled');
+
+-- EVENT TYPES (attrs_json: raised_by role, resulting_status, allowed_next_status)
+INSERT INTO ref_lookup (lookup_type, code, meaning, attrs_json) VALUES
+  ('EVENT_TYPE','CARTON_CREATED','Carton registered', json('{"raised_by":"BUSINESS","resulting_status":"Created","from":[null],"to":"Created"}')),
+  ('EVENT_TYPE','PICKUP_REQUESTED','Business requests collection', json('{"raised_by":"BUSINESS","resulting_status":"Pickup Requested","from":["Created"],"to":"Pickup Requested"}')),
+  ('EVENT_TYPE','PICKED_UP_BY_VENDOR','Vendor confirms collection', json('{"raised_by":"VENDOR","resulting_status":"In Transit to Vendor","from":["Pickup Requested"],"to":"In Transit to Vendor"}')),
+  ('EVENT_TYPE','RECEIVED_AT_WAREHOUSE','Vendor confirms warehouse receipt', json('{"raised_by":"VENDOR","resulting_status":"In Storage","from":["In Transit to Vendor","Return Requested"],"to":"In Storage"}')),
+  ('EVENT_TYPE','RETRIEVAL_REQUESTED','Business requests retrieval', json('{"raised_by":"BUSINESS","resulting_status":"Retrieval Requested","from":["In Storage"],"to":"Retrieval Requested"}')),
+  ('EVENT_TYPE','DELIVERED_TO_BUSINESS','Vendor delivers to business', json('{"raised_by":"VENDOR","resulting_status":"With Business","from":["Retrieval Requested"],"to":"With Business"}')),
+  ('EVENT_TYPE','RETURN_REQUESTED','Business requests return', json('{"raised_by":"BUSINESS","resulting_status":"Return Requested","from":["With Business"],"to":"Return Requested"}')),
+  ('EVENT_TYPE','DESTRUCTION_REQUESTED','Business requests destruction', json('{"raised_by":"BUSINESS","resulting_status":"Destruction Requested","from":["In Storage"],"to":"Destruction Requested"}')),
+  ('EVENT_TYPE','DESTRUCTION_APPROVED','Compliance approves destruction', json('{"raised_by":"COMPLIANCE","resulting_status":"Approved for Destruction","from":["Destruction Requested"],"to":"Approved for Destruction"}')),
+  ('EVENT_TYPE','DESTROYED','Vendor destroys the carton', json('{"raised_by":"VENDOR","resulting_status":"Destroyed","from":["Approved for Destruction"],"to":"Destroyed"}')),
+  ('EVENT_TYPE','INTER_WAREHOUSE_TRANSFER','Vendor moves between its warehouses', json('{"raised_by":"VENDOR","resulting_status":"In Storage","from":["In Storage"],"to":"In Storage"}')),
+  ('EVENT_TYPE','LEGAL_HOLD_APPLIED','Compliance applies a hold', json('{"raised_by":"COMPLIANCE","resulting_status":null}')),
+  ('EVENT_TYPE','LEGAL_HOLD_RELEASED','Compliance releases a hold', json('{"raised_by":"COMPLIANCE","resulting_status":null}')),
+  ('EVENT_TYPE','REQUEST_ACKNOWLEDGED','Vendor acknowledgment', json('{"raised_by":"VENDOR","resulting_status":null}')),
+  ('EVENT_TYPE','REQUEST_REJECTED','Rejected instruction/approval', json('{"resulting_status":"In Storage","from":["Destruction Requested"],"to":"In Storage"}')),
+  ('EVENT_TYPE','REQUEST_CANCELLED','Business cancellation', json('{"raised_by":"BUSINESS","resulting_status":null}')),
+  ('EVENT_TYPE','FILE_INDEXED','File index added/corrected', json('{"raised_by":"BUSINESS","resulting_status":null}')),
+  ('EVENT_TYPE','CERTIFICATE_LODGED','Evidence attachment', json('{"raised_by":"VENDOR","resulting_status":null}')),
+  ('EVENT_TYPE','RECONCILIATION_RUN','Recorded reconciliation', json('{"raised_by":"FACILITIES","resulting_status":null}'));
+
+-- SLA (numeric_value = business days; attrs_json = start/end) -----------------
+INSERT INTO ref_lookup (lookup_type, code, numeric_value, attrs_json) VALUES
+  ('SLA','PICKUP',2, json('{"starts_on":"REQUEST_SUBMITTED","ends_on":"WAREHOUSE_RECEIPT"}')),
+  ('SLA','RETRIEVAL',2, json('{"starts_on":"REQUEST_SUBMITTED","ends_on":"BUSINESS_DELIVERY"}')),
+  ('SLA','RETURN',2, json('{"starts_on":"REQUEST_SUBMITTED","ends_on":"WAREHOUSE_RECEIPT"}')),
+  ('SLA','DESTRUCTION',5, json('{"starts_on":"DESTRUCTION_APPROVED","ends_on":"CERTIFICATE_ISSUED"}'));
+
+-- THRESHOLDS (numeric_value = days; attrs_json = day_basis) -------------------
+INSERT INTO ref_lookup (lookup_type, code, meaning, numeric_value, attrs_json) VALUES
+  ('THRESHOLD','In Transit to Vendor','Possibly lost in transit',30, json('{"day_basis":"CALENDAR"}')),
+  ('THRESHOLD','With Business','Borrowing convention',90, json('{"day_basis":"CALENDAR"}')),
+  ('THRESHOLD','Request open','Past its own due date',0, json('{"day_basis":"CALENDAR"}'));
+
+-- TAX (numeric_value = pct*100 to keep integer; attrs_json = date range) ------
+INSERT INTO ref_lookup (lookup_type, code, numeric_value, attrs_json) VALUES
+  ('TAX','GST-18',1800, json('{"effective_from":"2024-04-01","effective_to":null}'));
+
+-- HOLIDAYS -------------------------------------------------------------------
+INSERT INTO ref_lookup (lookup_type, code, name) VALUES
+  ('HOLIDAY','2025-01-26','Republic Day'),('HOLIDAY','2025-03-14','Holi'),
+  ('HOLIDAY','2025-08-15','Independence Day'),('HOLIDAY','2025-10-02','Gandhi Jayanti'),
+  ('HOLIDAY','2025-10-21','Diwali'),('HOLIDAY','2025-12-25','Christmas'),
+  ('HOLIDAY','2026-01-26','Republic Day'),('HOLIDAY','2026-08-15','Independence Day'),
+  ('HOLIDAY','2026-10-02','Gandhi Jayanti');
+
+-- ACTIVITIES -----------------------------------------------------------------
+INSERT INTO ref_lookup (lookup_type, code) VALUES
+  ('ACTIVITY','PICKUP'),('ACTIVITY','RETRIEVAL'),('ACTIVITY','RETURN'),
+  ('ACTIVITY','DESTRUCTION'),('ACTIVITY','STORAGE');
+
+-- ORG UNITS (entity + department merged) -------------------------------------
+INSERT INTO org_unit (entity_id, department_id, entity_name, department_name) VALUES
+  ('ENT-BRN','DEP-BRN-DEL','Branch Banking','Delhi Branch'),
+  ('ENT-BRN','DEP-BRN-PUN','Branch Banking','Pune Branch'),
+  ('ENT-BRN','DEP-BRN-MUM','Branch Banking','Mumbai Branch'),
+  ('ENT-BRN','DEP-BRN-KOL','Branch Banking','Kolkata Branch'),
+  ('ENT-BRN','DEP-BRN-CHE','Branch Banking','Chennai Branch'),
+  ('ENT-MF','DEP-MF-OPS','Mutual Fund','MF Operations'),
+  ('ENT-MF','DEP-MF-INV','Mutual Fund','Investor Services'),
+  ('ENT-MF','DEP-MF-CMP','Mutual Fund','MF Compliance'),
+  ('ENT-GCC','DEP-GCC-TRP','GCC','Transport'),
+  ('ENT-GCC','DEP-GCC-RE','GCC','Real Estate'),
+  ('ENT-GCC','DEP-GCC-AFMG','GCC','AFMG'),
+  ('ENT-GCC','DEP-GCC-AP','GCC','Accounts Payable'),
+  ('ENT-GCC','DEP-GCC-HR','GCC','Human Resources');
+
+-- VENDORS --------------------------------------------------------------------
 INSERT INTO vendor (vendor_id, vendor_name, status, contract_start, contract_ref, ops_contact_email, recertification_frequency) VALUES
   ('VND-001','SecureVault Storage Pvt Ltd','Active','2018-04-01','MSA-2018-114','vendor.ops@securevault.example','Quarterly'),
   ('VND-002','RecordSafe India Ltd','Active','2020-07-01','MSA-2020-227','india.ops@recordsafe.example','Quarterly'),
   ('VND-003','ArchivePro Logistics','Active','2023-01-15','MSA-2022-091','support@archivepro.example','Quarterly');
 
-INSERT INTO warehouse (location_id, vendor_id, location_name, city, capacity_cartons) VALUES
+-- WAREHOUSE LOCATIONS --------------------------------------------------------
+INSERT INTO warehouse_location (location_id, vendor_id, location_name, city, capacity_cartons) VALUES
   ('LOC-MUM-01','VND-001','Mumbai Warehouse - Bhiwandi','Mumbai',22000),
   ('LOC-DEL-01','VND-001','Delhi NCR Warehouse - Manesar','Delhi NCR',14000),
   ('LOC-PUN-01','VND-002','Pune Warehouse - Chakan','Pune',9000),
@@ -33,124 +157,18 @@ INSERT INTO warehouse (location_id, vendor_id, location_name, city, capacity_car
   ('LOC-CHE-01','VND-003','Chennai Warehouse - Sriperumbudur','Chennai',7000),
   ('LOC-BLR-01','VND-003','Bengaluru Warehouse - Nelamangala','Bengaluru',8000);
 
-INSERT INTO document_type (document_type, base_retention_years, trigger_event_description) VALUES
-  ('Client KYC',8,'Relationship closure date'),
-  ('Loan Agreements',10,'Loan closure date'),
-  ('Other Agreements and Vendor Data',7,'Contract end date'),
-  ('Vendor Onboarding',7,'Onboarding completion date'),
-  ('Audit Reports',10,'Report issue date'),
-  ('Invoices',8,'Financial year end'),
-  ('Misc Documents',5,'Carton creation date');
-
-INSERT INTO archival_policy (archival_policy) VALUES ('Banking'),('Country Specific'),('Standard');
-
-INSERT INTO retention_policy (policy_id, document_type, archival_policy, retention_years) VALUES
-  ('RET-001','Client KYC','Standard',8),
-  ('RET-002','Client KYC','Country Specific',10),
-  ('RET-003','Client KYC','Banking',10),
-  ('RET-004','Loan Agreements','Standard',10),
-  ('RET-005','Loan Agreements','Country Specific',12),
-  ('RET-006','Loan Agreements','Banking',10),
-  ('RET-007','Other Agreements and Vendor Data','Standard',7),
-  ('RET-008','Other Agreements and Vendor Data','Country Specific',9),
-  ('RET-009','Other Agreements and Vendor Data','Banking',10),
-  ('RET-010','Vendor Onboarding','Standard',7),
-  ('RET-011','Vendor Onboarding','Country Specific',9),
-  ('RET-012','Vendor Onboarding','Banking',10),
-  ('RET-013','Audit Reports','Standard',10),
-  ('RET-014','Audit Reports','Country Specific',12),
-  ('RET-015','Audit Reports','Banking',10),
-  ('RET-016','Invoices','Standard',8),
-  ('RET-017','Invoices','Country Specific',10),
-  ('RET-018','Invoices','Banking',10),
-  ('RET-019','Misc Documents','Standard',5),
-  ('RET-020','Misc Documents','Country Specific',7),
-  ('RET-021','Misc Documents','Banking',10);
-
-INSERT INTO vendor_rate (vendor_id, activity, rate_inr, unit, effective_from, effective_to) VALUES
-  ('VND-001','PICKUP','500','PER_CARTON','2024-04-01',NULL),
-  ('VND-001','RETRIEVAL','500','PER_CARTON','2024-04-01',NULL),
-  ('VND-001','DESTRUCTION','750','PER_CARTON','2024-04-01',NULL),
-  ('VND-001','STORAGE','100','PER_CARTON_MONTH','2024-04-01','2026-04-01'),
-  ('VND-001','STORAGE','108','PER_CARTON_MONTH','2026-04-01',NULL),
-  ('VND-002','PICKUP','450','PER_CARTON','2024-04-01',NULL),
-  ('VND-002','RETRIEVAL','550','PER_CARTON','2024-04-01',NULL),
-  ('VND-002','DESTRUCTION','700','PER_CARTON','2024-04-01',NULL),
-  ('VND-002','STORAGE','95','PER_CARTON_MONTH','2024-04-01',NULL),
-  ('VND-003','PICKUP','520','PER_CARTON','2025-01-01',NULL),
-  ('VND-003','RETRIEVAL','520','PER_CARTON','2025-01-01',NULL),
-  ('VND-003','DESTRUCTION','800','PER_CARTON','2025-01-01',NULL),
-  ('VND-003','STORAGE','110','PER_CARTON_MONTH','2025-01-01',NULL);
-
-INSERT INTO sla_rule (activity, business_days, starts_on, ends_on, definition) VALUES
-  ('PICKUP',2,'REQUEST_SUBMITTED','WAREHOUSE_RECEIPT','Business days from request to carton received at warehouse'),
-  ('RETRIEVAL',2,'REQUEST_SUBMITTED','BUSINESS_DELIVERY','Business days from request to carton delivered to requester'),
-  ('RETURN',2,'REQUEST_SUBMITTED','WAREHOUSE_RECEIPT','Business days from return request to carton back in storage'),
-  ('DESTRUCTION',5,'DESTRUCTION_APPROVED','CERTIFICATE_ISSUED','Business days from approved destruction to certificate issued');
-
-INSERT INTO holiday (holiday_date, holiday_name) VALUES
-  ('2025-01-26','Republic Day'),('2025-03-14','Holi'),('2025-08-15','Independence Day'),
-  ('2025-10-02','Gandhi Jayanti'),('2025-10-21','Diwali'),('2025-12-25','Christmas'),
-  ('2026-01-26','Republic Day'),('2026-08-15','Independence Day'),('2026-10-02','Gandhi Jayanti');
-
-INSERT INTO threshold_rule (threshold_id, applies_to, threshold_days, day_basis, meaning) VALUES
-  ('THR-001','In Transit to Vendor',30,'CALENDAR','Collected but not receipted; far beyond pickup SLA - treat as possibly lost'),
-  ('THR-002','With Business',90,'CALENDAR','Recalled and not returned; borrowing convention, not a contractual SLA'),
-  ('THR-003','Request open',0,'CALENDAR','Request past its own sla_due_date; no grace period');
-
-INSERT INTO tax_rule (tax_code, rate_percent, effective_from, effective_to) VALUES
-  ('GST-18','18','2024-04-01',NULL);
-
-INSERT INTO carton_status (status_code, meaning, is_terminal) VALUES
-  ('Created','Carton registered by business; not yet collected',0),
-  ('Pickup Requested','Pickup request raised, awaiting vendor',0),
-  ('In Transit to Vendor','Collected by vendor, not yet receipted',0),
-  ('In Storage','Held at vendor warehouse',0),
-  ('Retrieval Requested','Retrieval raised, awaiting delivery',0),
-  ('With Business','Physically with the requesting department',0),
-  ('Return Requested','Return to vendor raised',0),
-  ('Destruction Requested','Awaiting approval',0),
-  ('Approved for Destruction','Approved, awaiting vendor execution',0),
-  ('Destroyed','Terminal state, certificate issued',1),
-  ('Missing','Exception state raised by reconciliation',0);
-
-INSERT INTO event_type (event_type, meaning, changes_custody, expected_role, resulting_status, request_requirement) VALUES
-  ('CARTON_CREATED','A carton is registered and its files indexed.',0,'BUSINESS','Created','No'),
-  ('PICKUP_REQUESTED','Business asks the vendor to collect the carton.',0,'BUSINESS','Pickup Requested','Yes - PICKUP'),
-  ('PICKED_UP_BY_VENDOR','Vendor confirms physical collection.',1,'VENDOR','In Transit to Vendor','Yes - PICKUP'),
-  ('RECEIVED_AT_WAREHOUSE','Vendor confirms arrival/shelving at warehouse.',1,'VENDOR','In Storage','Yes - PICKUP or RETURN'),
-  ('RETRIEVAL_REQUESTED','Business asks for a stored carton temporarily.',0,'BUSINESS','Retrieval Requested','Yes - RETRIEVAL'),
-  ('DELIVERED_TO_BUSINESS','Vendor confirms delivery to business.',1,'VENDOR','With Business','Yes - RETRIEVAL'),
-  ('RETURN_REQUESTED','Business asks the vendor to take the carton back.',0,'BUSINESS','Return Requested','Yes - RETURN'),
-  ('DESTRUCTION_REQUESTED','Owner asks for destruction after retention.',0,'BUSINESS','Destruction Requested','Yes - DESTRUCTION'),
-  ('DESTRUCTION_APPROVED','Compliance authorises the destruction.',0,'COMPLIANCE','Approved for Destruction','Yes - DESTRUCTION'),
-  ('DESTROYED','Vendor destroys the carton and issues a certificate.',1,'VENDOR','Destroyed','Yes - DESTRUCTION'),
-  ('INTER_WAREHOUSE_TRANSFER','Vendor moves a carton between its own warehouses.',1,'VENDOR','In Storage','No'),
-  ('LEGAL_HOLD_APPLIED','Compliance freezes the carton against destruction.',0,'COMPLIANCE',NULL,'No'),
-  ('LEGAL_HOLD_RELEASED','Compliance lifts the freeze.',0,'COMPLIANCE',NULL,'No'),
-  ('REQUEST_ACKNOWLEDGED','Vendor acknowledgment',0,'VENDOR',NULL,'NONE'),
-  ('REQUEST_REJECTED','Rejected instruction or approval',0,NULL,NULL,'NONE'),
-  ('REQUEST_CANCELLED','Business cancellation',0,'BUSINESS',NULL,'NONE'),
-  ('FILE_INDEXED','File index added or corrected',0,'BUSINESS',NULL,'NONE'),
-  ('CERTIFICATE_LODGED','Evidence attachment, not a physical movement',0,'VENDOR',NULL,'NONE'),
-  ('REFERENCE_CHANGED','Before/after configuration values',0,NULL,NULL,'NONE'),
-  ('USER_ACCESS_CHANGED','Access assignment or deactivation',0,'FACILITIES',NULL,'NONE'),
-  ('EXCEPTION_UPDATED','Investigation or resolution',0,NULL,NULL,'NONE'),
-  ('RECONCILIATION_RUN','Recorded reconciliation request',0,'FACILITIES',NULL,'NONE'),
-  ('CORRECTION_RECORDED','Compensating evidence; privileged reviewed process',0,NULL,NULL,'NONE');
-
-INSERT INTO lifecycle_transition (from_status, event_type, to_status) VALUES
-  ('Created','PICKUP_REQUESTED','Pickup Requested'),
-  ('Pickup Requested','PICKED_UP_BY_VENDOR','In Transit to Vendor'),
-  ('In Transit to Vendor','RECEIVED_AT_WAREHOUSE','In Storage'),
-  ('In Storage','RETRIEVAL_REQUESTED','Retrieval Requested'),
-  ('Retrieval Requested','DELIVERED_TO_BUSINESS','With Business'),
-  ('With Business','RETURN_REQUESTED','Return Requested'),
-  ('Return Requested','RECEIVED_AT_WAREHOUSE','In Storage'),
-  ('In Storage','DESTRUCTION_REQUESTED','Destruction Requested'),
-  ('Destruction Requested','DESTRUCTION_APPROVED','Approved for Destruction'),
-  ('Approved for Destruction','DESTROYED','Destroyed'),
-  ('In Storage','INTER_WAREHOUSE_TRANSFER','In Storage'),
-  ('Pickup Requested','REQUEST_CANCELLED','Created'),
-  ('Retrieval Requested','REQUEST_CANCELLED','In Storage'),
-  ('Destruction Requested','REQUEST_REJECTED','In Storage');
+-- RATE CARD ------------------------------------------------------------------
+INSERT INTO rate_card (vendor_id, activity, effective_from, effective_to, rate_inr, unit) VALUES
+  ('VND-001','PICKUP','2024-04-01',NULL,500,'PER_CARTON'),
+  ('VND-001','RETRIEVAL','2024-04-01',NULL,500,'PER_CARTON'),
+  ('VND-001','DESTRUCTION','2024-04-01',NULL,750,'PER_CARTON'),
+  ('VND-001','STORAGE','2024-04-01','2026-04-01',100,'PER_CARTON_MONTH'),
+  ('VND-001','STORAGE','2026-04-01',NULL,108,'PER_CARTON_MONTH'),
+  ('VND-002','PICKUP','2024-04-01',NULL,450,'PER_CARTON'),
+  ('VND-002','RETRIEVAL','2024-04-01',NULL,550,'PER_CARTON'),
+  ('VND-002','DESTRUCTION','2024-04-01',NULL,700,'PER_CARTON'),
+  ('VND-002','STORAGE','2024-04-01',NULL,95,'PER_CARTON_MONTH'),
+  ('VND-003','PICKUP','2025-01-01',NULL,520,'PER_CARTON'),
+  ('VND-003','RETRIEVAL','2025-01-01',NULL,520,'PER_CARTON'),
+  ('VND-003','DESTRUCTION','2025-01-01',NULL,800,'PER_CARTON'),
+  ('VND-003','STORAGE','2025-01-01',NULL,110,'PER_CARTON_MONTH');

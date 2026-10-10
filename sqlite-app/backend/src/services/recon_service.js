@@ -1,35 +1,26 @@
-// Reconciliation run/exception framework. The three full detection engines
-// (inventory as-of custody, invoice arithmetic + independent cost match,
-// certificate vs hold/event) are the documented next increment — see docs.
+// Reconciliation run/exception framework for the 16-table design.
+// Runs are not a table: run fields are inlined on recon_finding. A "run" here is
+// a deterministic run_id (hash of kind+scope+params). The three detection
+// engines (inventory/invoice/certificate) are the documented next increment.
 import { createHash } from "node:crypto";
-import { config } from "../config.js";
 import { reconRepo } from "../repositories/index.js";
-import { nowIso } from "../models/index.js";
 
 export function startRun(user, { runKind, scopeKey, parameters = {} }) {
-  const ruleSnapshot = { engineVersion: config.engineVersion };
-  const fingerprint = createHash("sha256")
-    .update(JSON.stringify({ runKind, scopeKey, parameters, ruleSnapshot }))
-    .digest("hex");
+  const runId = createHash("sha256")
+    .update(JSON.stringify({ runKind, scopeKey, parameters }))
+    .digest("hex")
+    .slice(0, 32);
 
-  // Idempotency: same kind + scope + fingerprint returns the existing run.
-  const existing = reconRepo.findRun(runKind, scopeKey, fingerprint);
-  if (existing) return { run_id: existing.runId, status: existing.status, deduplicated: true };
+  // Idempotency: same kind+scope+params yields the same run_id. If findings for
+  // that run already exist, report it as a dedup rather than re-running.
+  const existing = reconRepo.findRunByFingerprint(runId);
+  if (existing) return { run_id: runId, status: existing.run_status, deduplicated: true };
 
-  const runId = reconRepo.insertRun({
-    runKind,
-    scopeKey,
-    inputFingerprint: fingerprint,
-    parameters,
-    ruleSnapshot,
-    engineVersion: config.engineVersion,
-    requestedBy: user.userId,
-    status: "COMPLETED",
-    finishedAt: nowIso(),
-    counts: { note: "engine stub — findings produced by the engine increment" },
-  });
-  return { run_id: runId, status: "COMPLETED", deduplicated: false };
+  // Engine stub: no findings produced yet; a completed run with zero findings is
+  // represented by the absence of recon_finding rows for this run_id.
+  return { run_id: runId, status: "COMPLETED", deduplicated: false, findings: 0 };
 }
 
 export const listRuns = () => reconRepo.listRuns();
-export const listExceptions = (user) => reconRepo.listExceptions({ role: user.roleCode, vendorId: user.vendorId });
+export const listExceptions = (user) =>
+  reconRepo.listExceptions({ role: user.roleCode, vendorId: user.vendorId });

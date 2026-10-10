@@ -1,23 +1,19 @@
 /**
- * One canonical append-only event. carton_state and custody_interval are
- * rebuildable projections of this stream.
+ * Flat append-only event. The denormalized carton row holds current state;
+ * event_log is the immutable audit history.
  *
  * @typedef {Object} EventLogRecord
- * @property {number} eventId
- * @property {string} streamKind
- * @property {string} streamId
- * @property {number} streamVersion
- * @property {string|null} cartonId
- * @property {string|null} requestId
+ * @property {string} eventId
+ * @property {string} cartonId
+ * @property {string} eventTimestamp
  * @property {string} eventType
- * @property {string} occurredAt
- * @property {string} recordedAt
- * @property {string|null} actorUserId
- * @property {string} actorRole
- * @property {string} channel
+ * @property {string|null} fromLocation
+ * @property {string|null} toLocation
+ * @property {string|null} actorId
+ * @property {string|null} requestId
  * @property {string|null} resultingStatus   null = status unchanged
- * @property {object} payload
- * @property {string} idempotencyKey
+ * @property {string|null} remarks
+ * @property {string|null} idempotencyKey
  */
 
 export const EventLogEntry = {
@@ -28,19 +24,15 @@ export const EventLogEntry = {
     if (!row) return null;
     return {
       eventId: row.event_id,
-      streamKind: row.stream_kind,
-      streamId: row.stream_id,
-      streamVersion: row.stream_version,
       cartonId: row.carton_id,
-      requestId: row.request_id,
+      eventTimestamp: row.event_timestamp,
       eventType: row.event_type,
-      occurredAt: row.occurred_at,
-      recordedAt: row.recorded_at,
-      actorUserId: row.actor_user_id,
-      actorRole: row.actor_role,
-      channel: row.channel,
+      fromLocation: row.from_location,
+      toLocation: row.to_location,
+      actorId: row.actor_id,
+      requestId: row.request_id,
       resultingStatus: row.resulting_status,
-      payload: row.payload ? JSON.parse(row.payload) : {},
+      remarks: row.remarks,
       idempotencyKey: row.idempotency_key,
     };
   },
@@ -49,12 +41,11 @@ export const EventLogEntry = {
     return {
       eventId: e.eventId,
       eventType: e.eventType,
-      occurredAt: e.occurredAt,
-      actorRole: e.actorRole,
-      actorUserId: e.actorUserId,
+      occurredAt: e.eventTimestamp,
+      actorId: e.actorId,
       resultingStatus: e.resultingStatus,
       requestId: e.requestId,
-      payload: e.payload,
+      remarks: e.remarks,
     };
   },
 };

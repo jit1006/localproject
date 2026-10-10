@@ -1,41 +1,47 @@
 import { db } from "../db/connection.js";
-import { ServiceRequest } from "../models/index.js";
+import { Request } from "../models/index.js";
 
 export function findById(requestId) {
-  const row = db.prepare("SELECT * FROM service_request WHERE request_id = ?").get(requestId);
-  return ServiceRequest.fromRow(row);
+  const row = db.prepare("SELECT * FROM request WHERE request_id = ?").get(requestId);
+  return Request.fromRow(row);
 }
 
 export function insert(r) {
   db.prepare(
-    `INSERT INTO service_request (request_id, carton_id, request_type, vendor_id, raised_by, raised_at, request_status)
-     VALUES (@requestId, @cartonId, @requestType, @vendorId, @raisedBy, @raisedAt, @requestStatus)`,
+    `INSERT INTO request (request_id, request_type, carton_id, raised_by, raised_on, vendor_id, request_status)
+     VALUES (@requestId, @requestType, @cartonId, @raisedBy, @raisedOn, @vendorId, @requestStatus)`,
   ).run({
     requestId: r.requestId,
-    cartonId: r.cartonId,
     requestType: r.requestType,
-    vendorId: r.vendorId,
+    cartonId: r.cartonId,
     raisedBy: r.raisedBy,
-    raisedAt: r.raisedAt,
+    raisedOn: r.raisedOn,
+    vendorId: r.vendorId,
     requestStatus: r.requestStatus,
   });
   return findById(r.requestId);
 }
 
-export function setStatus(requestId, fields) {
+export function setFields(requestId, fields) {
   const sets = [];
   const params = { requestId };
   for (const [k, v] of Object.entries(fields)) {
     sets.push(`${k} = @${k}`);
     params[k] = v;
   }
-  db.prepare(`UPDATE service_request SET ${sets.join(", ")} WHERE request_id = @requestId`).run(params);
+  db.prepare(`UPDATE request SET ${sets.join(", ")} WHERE request_id = @requestId`).run(params);
   return findById(requestId);
 }
 
 export function listForVendor(vendorId) {
-  const rows = db
-    .prepare("SELECT * FROM service_request WHERE vendor_id = ? ORDER BY raised_at DESC")
-    .all(vendorId);
-  return rows.map(ServiceRequest.fromRow);
+  return db
+    .prepare("SELECT * FROM request WHERE vendor_id = ? ORDER BY raised_on DESC")
+    .all(vendorId)
+    .map(Request.fromRow);
+}
+
+export function countForUser({ role, userId, vendorId }) {
+  if (role === "BUSINESS") return db.prepare("SELECT count(*) n FROM request WHERE raised_by = ?").get(userId).n;
+  if (role === "VENDOR") return db.prepare("SELECT count(*) n FROM request WHERE vendor_id = ?").get(vendorId).n;
+  return db.prepare("SELECT count(*) n FROM request").get().n;
 }
