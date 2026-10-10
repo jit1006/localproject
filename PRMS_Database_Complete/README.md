@@ -24,8 +24,14 @@ Run from the extracted package folder. btree_gist must be available.
 ```bash
 psql "$PRMS_DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/01_schema.sql
 psql "$PRMS_DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/02_seed_reference.sql
+psql "$PRMS_DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/05_design_improvements.sql
 psql "$PRMS_DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/04_constraint_checks.sql
 ```
+
+`05_design_improvements.sql` is an additive migration (indexes and catalog comments
+only — no table/column/constraint changes) that tunes the read paths behind the
+required role screens and the <2s list/filter target. It is safe to run after `01`
+and before `04`; it does not affect the seed or the constraint checks.
 
 Then securely provision a separate non-owner runtime login and apply sql/03_runtime_grants.sql using psql's runtime_role variable. Never commit credentials.
 
