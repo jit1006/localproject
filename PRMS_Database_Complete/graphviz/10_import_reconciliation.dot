@@ -1,0 +1,35 @@
+digraph flow {
+graph [rankdir=TB,bgcolor="#f6f8fc",pad=0.4,nodesep=0.7,ranksep=0.7,fontname="DejaVu Sans",fontsize=22,labelloc=t,label="Lossless ingestion and reconciliation"];
+node [shape=box,style="rounded,filled",fillcolor="white",color="#a9bed2",fontname="DejaVu Sans",fontsize=13,margin="0.25,0.17"];
+edge [fontname="DejaVu Sans",fontsize=11,color="#547995"];
+A [label="Upload source artifact"];
+B [label="Hash file and reuse identical import"];
+C [label="Preserve every source row"];
+D [label="Normalize known formats and references"];
+E [label="Map valid internal data; retain rejected rows with issues"];
+F [label="Replay event history and compare cached state"];
+G [label="Keep vendor evidence separate"];
+H [label="Facilities selects artifact / period and runs reconciliation"];
+I [label="Inventory: compare as-of custody with declaration"];
+J [label="Invoice: self-check then compare independent costs"];
+K [label="Certificate: compare request, event and hold history"];
+L [label="Reuse unchanged run fingerprint"];
+M [label="Upsert stable exception case and append finding"];
+N [label="Owner investigates; resolve with reason and evidence"];
+A -> B [label=""];
+B -> C [label=""];
+C -> D [label=""];
+D -> E [label=""];
+E -> F [label=""];
+D -> G [label="Vendor rows"];
+F -> H [label=""];
+G -> H [label=""];
+H -> L [label="Same inputs"];
+H -> I [label="Inventory"];
+H -> J [label="Invoice"];
+H -> K [label="Certificate"];
+I -> M [label=""];
+J -> M [label=""];
+K -> M [label=""];
+M -> N [label=""];
+}

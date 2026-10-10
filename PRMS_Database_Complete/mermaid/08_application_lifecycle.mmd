@@ -1,0 +1,40 @@
+flowchart TD
+    A["Business: register carton and index files"]
+    B["Business: request pickup"]
+    C["Vendor: acknowledge and collect"]
+    D["IN TRANSIT - not yet stored"]
+    E["Vendor: warehouse receipt"]
+    F["IN STORAGE"]
+    G["Business: request retrieval"]
+    H["Vendor: deliver to business"]
+    I["WITH BUSINESS"]
+    J["Business: request return"]
+    K["Vendor: receive return"]
+    L["Retention expired?"]
+    M["Business: request destruction"]
+    N["Compliance: verify and approve"]
+    O["Vendor: recheck hold, approval and custody"]
+    P["Destroy and record evidence"]
+    Q["DESTROYED - terminal physical state"]
+    R["Refuse with reason / wait for eligibility"]
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+    F -->|"Retrieve"| G
+    G --> H
+    H --> I
+    I --> J
+    J --> K
+    K --> F
+    F -->|"Dispose"| L
+    L -->|"Yes"| M
+    L -->|"No"| R
+    M -->|"No hold + in warehouse"| N
+    M -->|"Hold / not in warehouse"| R
+    N -->|"Approved"| O
+    N -->|"Rejected or blocked"| R
+    O -->|"Eligible"| P
+    O -->|"Hold / invalid state"| R
+    P --> Q

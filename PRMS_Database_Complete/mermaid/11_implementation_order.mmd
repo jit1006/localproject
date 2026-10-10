@@ -1,0 +1,24 @@
+flowchart TD
+    A["Install PostgreSQL and create empty development database"]
+    B["Apply 01_schema.sql"]
+    C["Apply 02_seed_reference.sql"]
+    D["Run 04_constraint_checks.sql"]
+    E["Provision non-owner runtime login and apply grants"]
+    F["Build authentication and scoped queries"]
+    G["Implement event append / replay transaction"]
+    H["Prove carton creation and pickup receipt"]
+    I["Add retrieval, return, holds and destruction"]
+    J["Implement operational importer and reconciliation"]
+    K["Test direct API misuse, retries and concurrency"]
+    L["Clean-install rehearsal and demo release"]
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+    F --> G
+    G --> H
+    H --> I
+    I --> J
+    J --> K
+    K --> L

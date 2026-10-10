@@ -1,0 +1,99 @@
+erDiagram
+    direction TB
+    IMPORT_BATCH {
+        bigint batch_id PK
+        text source_name
+        text source_kind
+        text vendor_id FK
+        text sha256
+        text uploaded_by FK
+        timestamptz uploaded_at
+        text source_timezone
+        text artifact_uri
+    }
+    IMPORT_ROW {
+        bigint row_id PK
+        bigint batch_id FK
+        text sheet_name
+        integer row_number
+        jsonb raw_values
+    }
+    IMPORT_ISSUE {
+        bigint issue_id PK
+        bigint row_id FK
+        text code
+        text message
+        text disposition
+        timestamptz recorded_at
+    }
+    VENDOR_DECLARATION {
+        bigint declaration_id PK
+        bigint batch_id FK
+        text vendor_id FK
+        text cycle
+        timestamptz declared_at
+    }
+    VENDOR_DECLARATION_ITEM {
+        bigint declaration_item_id PK
+        bigint declaration_id FK
+        text carton_reference
+        text declared_location_reference
+        text declared_status
+        text vendor_notes
+        text facility_notes_as_received
+        bigint source_row_id FK, UK
+    }
+    VENDOR_INVOICE {
+        bigint invoice_record_id PK
+        text invoice_reference
+        text vendor_id FK
+        date billing_month
+        date invoice_date
+        text currency
+        integer declared_line_count
+        numeric declared_subtotal
+        numeric declared_tax_rate
+        numeric declared_tax_amount
+        numeric declared_total
+        text declared_status
+        bigint source_row_id FK, UK
+    }
+    VENDOR_INVOICE_LINE {
+        bigint invoice_line_id PK
+        bigint invoice_record_id FK
+        text invoice_reference
+        integer line_number
+        text line_type
+        text activity_reference
+        text carton_reference
+        text request_reference
+        numeric quantity
+        numeric unit_rate
+        numeric line_amount
+        text service_period_raw
+        date service_month
+        bigint source_row_id FK, UK
+    }
+    CERTIFICATE_EVIDENCE {
+        bigint certificate_row_id PK
+        text certificate_reference
+        text carton_reference
+        text vendor_reference
+        date destroyed_on
+        text destruction_location_reference
+        text destruction_method
+        text witnessed_by_reference
+        date issued_on
+        bigint source_row_id FK, UK
+        bigint evidence_event_id FK
+        timestamptz recorded_at
+    }
+    IMPORT_BATCH ||--o{ IMPORT_ROW : "batch_id"
+    IMPORT_ROW ||--o{ IMPORT_ISSUE : "row_id"
+    IMPORT_BATCH ||--o{ VENDOR_DECLARATION : "batch_id"
+    VENDOR_DECLARATION ||--o{ VENDOR_DECLARATION_ITEM : "declaration_id"
+    IMPORT_ROW ||--o| VENDOR_DECLARATION_ITEM : "source_row_id"
+    IMPORT_ROW ||--o| VENDOR_INVOICE : "source_row_id"
+    VENDOR_INVOICE o|--o{ VENDOR_INVOICE_LINE : "invoice_record_id"
+    IMPORT_ROW ||--o| VENDOR_INVOICE_LINE : "source_row_id"
+    IMPORT_ROW o|--o| CERTIFICATE_EVIDENCE : "source_row_id"

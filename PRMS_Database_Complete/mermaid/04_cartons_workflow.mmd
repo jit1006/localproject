@@ -1,0 +1,61 @@
+erDiagram
+    direction TB
+    CARTON {
+        text carton_id PK
+        text entity_id FK
+        text department_id FK
+        text owner_user_id FK
+        text document_type FK
+        text archival_policy FK
+        date carton_created_date
+        date retention_trigger_date
+        integer declared_file_count
+        text assigned_vendor_id FK
+        text barcode
+        text remarks
+        bigint source_row_id FK, UK
+    }
+    FILE_RECORD {
+        text file_id PK
+        text carton_id FK
+        text file_ref
+        text document_type FK
+        text file_description
+        integer document_year
+        boolean contains_pii
+        bigint source_row_id FK, UK
+    }
+    SERVICE_REQUEST {
+        text request_id PK
+        text carton_id FK
+        text request_type
+        text vendor_id FK
+        text raised_by FK
+        timestamptz raised_at
+        text request_status
+        jsonb destination
+        timestamptz vendor_ack_at
+        timestamptz completed_at
+        text approved_by FK
+        timestamptz approved_at
+        text rejection_reason
+        bigint sla_rule_id FK
+        jsonb sla_snapshot
+        date sla_due_date
+        bigint source_row_id FK, UK
+    }
+    CARTON_STATE {
+        text carton_id PK, FK
+        text status_code FK
+        text custody
+        text vendor_id FK
+        text warehouse_id FK
+        integer active_hold_count
+        timestamptz state_since
+        bigint last_event_id FK
+        bigint version
+        timestamptz rebuilt_at
+    }
+    CARTON ||--o{ FILE_RECORD : "carton_id, document_type"
+    CARTON ||--o{ SERVICE_REQUEST : "carton_id"
+    CARTON ||--o| CARTON_STATE : "carton_id"

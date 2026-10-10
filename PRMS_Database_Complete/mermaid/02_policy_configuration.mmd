@@ -1,0 +1,58 @@
+erDiagram
+    direction TB
+    DOCUMENT_TYPE {
+        text document_type PK
+        integer base_retention_years
+        text trigger_event_description
+    }
+    ARCHIVAL_POLICY {
+        text archival_policy PK
+    }
+    RETENTION_POLICY {
+        text policy_id PK
+        text entity_id FK
+        text document_type FK
+        text archival_policy FK
+        integer retention_years
+        integer revision
+        timestamptz updated_at
+    }
+    VENDOR_RATE {
+        bigint rate_id PK
+        text vendor_id FK
+        text activity
+        numeric rate_inr
+        text unit
+        date effective_from
+        date effective_to
+    }
+    SLA_RULE {
+        bigint sla_rule_id PK
+        text vendor_id FK
+        text activity
+        integer business_days
+        text starts_on
+        text ends_on
+        text definition
+        integer revision
+    }
+    HOLIDAY {
+        date holiday_date PK
+        text holiday_name
+    }
+    THRESHOLD_RULE {
+        text threshold_id PK
+        text applies_to
+        integer threshold_days
+        text day_basis
+        text meaning
+    }
+    TAX_RULE {
+        bigint tax_rule_id PK
+        text tax_code
+        numeric rate_percent
+        date effective_from
+        date effective_to
+    }
+    DOCUMENT_TYPE ||--o{ RETENTION_POLICY : "document_type"
+    ARCHIVAL_POLICY ||--o{ RETENTION_POLICY : "archival_policy"

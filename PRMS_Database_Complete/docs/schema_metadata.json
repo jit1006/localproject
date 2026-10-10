@@ -1,0 +1,4146 @@
+{
+  "tables": {
+    "business_entity": {
+      "columns": [
+        {
+          "name": "entity_id",
+          "type": "text",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "entity_name",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": true
+        }
+      ],
+      "constraints": [],
+      "keys": [
+        [
+          "entity_id"
+        ],
+        [
+          "entity_name"
+        ]
+      ]
+    },
+    "department": {
+      "columns": [
+        {
+          "name": "department_id",
+          "type": "text",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "entity_id",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "department_name",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [
+        "UNIQUE (entity_id, department_id)"
+      ],
+      "keys": [
+        [
+          "department_id"
+        ],
+        [
+          "entity_id",
+          "department_id"
+        ]
+      ]
+    },
+    "vendor": {
+      "columns": [
+        {
+          "name": "vendor_id",
+          "type": "text",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "vendor_name",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "contract_start",
+          "type": "date",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "contract_ref",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "ops_contact_email",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "recertification_frequency",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [],
+      "keys": [
+        [
+          "vendor_id"
+        ]
+      ]
+    },
+    "warehouse": {
+      "columns": [
+        {
+          "name": "location_id",
+          "type": "text",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "vendor_id",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "location_name",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "city",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "capacity_cartons",
+          "type": "integer",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [
+        "UNIQUE (vendor_id, location_id)"
+      ],
+      "keys": [
+        [
+          "location_id"
+        ],
+        [
+          "vendor_id",
+          "location_id"
+        ]
+      ]
+    },
+    "app_user": {
+      "columns": [
+        {
+          "name": "user_id",
+          "type": "text",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "full_name",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "email",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "role_code",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "entity_id",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "department_id",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "vendor_id",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "password_hash",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "is_active",
+          "type": "boolean",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [
+        "FOREIGN KEY (entity_id, department_id) REFERENCES department (entity_id, department_id)",
+        "CHECK ((role_code = 'BUSINESS' AND entity_id IS NOT NULL AND department_id IS NOT NULL AND vendor_id IS NULL) OR (role_code = 'VENDOR' AND entity_id IS NULL AND department_id IS NULL AND vendor_id IS NOT NULL) OR (role_code IN ('FACILITIES', 'COMPLIANCE') AND entity_id IS NULL AND department_id IS NULL AND vendor_id IS NULL))"
+      ],
+      "keys": [
+        [
+          "user_id"
+        ]
+      ]
+    },
+    "user_session": {
+      "columns": [
+        {
+          "name": "token_hash",
+          "type": "text",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "user_id",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "expires_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "revoked_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [
+        "CHECK (expires_at > created_at)"
+      ],
+      "keys": [
+        [
+          "token_hash"
+        ]
+      ]
+    },
+    "document_type": {
+      "columns": [
+        {
+          "name": "document_type",
+          "type": "text",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "base_retention_years",
+          "type": "integer",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "trigger_event_description",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [],
+      "keys": [
+        [
+          "document_type"
+        ]
+      ]
+    },
+    "archival_policy": {
+      "columns": [
+        {
+          "name": "archival_policy",
+          "type": "text",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [],
+      "keys": [
+        [
+          "archival_policy"
+        ]
+      ]
+    },
+    "retention_policy": {
+      "columns": [
+        {
+          "name": "policy_id",
+          "type": "text",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "entity_id",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "document_type",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "archival_policy",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "retention_years",
+          "type": "integer",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "revision",
+          "type": "integer",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [
+        "UNIQUE NULLS NOT DISTINCT (entity_id, document_type, archival_policy)"
+      ],
+      "keys": [
+        [
+          "policy_id"
+        ],
+        [
+          "entity_id",
+          "document_type",
+          "archival_policy"
+        ]
+      ]
+    },
+    "vendor_rate": {
+      "columns": [
+        {
+          "name": "rate_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "vendor_id",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "activity",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "rate_inr",
+          "type": "numeric(14, 2)",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "unit",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "effective_from",
+          "type": "date",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "effective_to",
+          "type": "date",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [
+        "CHECK (effective_to IS NULL OR effective_to > effective_from)",
+        "CHECK ((activity = 'STORAGE') = (unit = 'PER_CARTON_MONTH'))",
+        "EXCLUDE USING gist (vendor_id WITH OPERATOR(=), activity WITH OPERATOR(=), (daterange(effective_from, effective_to, '[)')) WITH OPERATOR(&&))"
+      ],
+      "keys": [
+        [
+          "rate_id"
+        ]
+      ]
+    },
+    "sla_rule": {
+      "columns": [
+        {
+          "name": "sla_rule_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "vendor_id",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "activity",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "business_days",
+          "type": "integer",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "starts_on",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "ends_on",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "definition",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "revision",
+          "type": "integer",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [
+        "UNIQUE NULLS NOT DISTINCT (vendor_id, activity)"
+      ],
+      "keys": [
+        [
+          "sla_rule_id"
+        ],
+        [
+          "vendor_id",
+          "activity"
+        ]
+      ]
+    },
+    "holiday": {
+      "columns": [
+        {
+          "name": "holiday_date",
+          "type": "date",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "holiday_name",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [],
+      "keys": [
+        [
+          "holiday_date"
+        ]
+      ]
+    },
+    "threshold_rule": {
+      "columns": [
+        {
+          "name": "threshold_id",
+          "type": "text",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "applies_to",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "threshold_days",
+          "type": "integer",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "day_basis",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "meaning",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [],
+      "keys": [
+        [
+          "threshold_id"
+        ]
+      ]
+    },
+    "tax_rule": {
+      "columns": [
+        {
+          "name": "tax_rule_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "tax_code",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "rate_percent",
+          "type": "numeric(5, 2)",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "effective_from",
+          "type": "date",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "effective_to",
+          "type": "date",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [
+        "CHECK (effective_to IS NULL OR effective_to > effective_from)",
+        "EXCLUDE USING gist (tax_code WITH OPERATOR(=), (daterange(effective_from, effective_to, '[)')) WITH OPERATOR(&&))"
+      ],
+      "keys": [
+        [
+          "tax_rule_id"
+        ]
+      ]
+    },
+    "carton_status": {
+      "columns": [
+        {
+          "name": "status_code",
+          "type": "text",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "meaning",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "is_terminal",
+          "type": "boolean",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [],
+      "keys": [
+        [
+          "status_code"
+        ]
+      ]
+    },
+    "event_type": {
+      "columns": [
+        {
+          "name": "event_type",
+          "type": "text",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "meaning",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "changes_custody",
+          "type": "boolean",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "expected_role",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "resulting_status",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "request_requirement",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "source_definition",
+          "type": "jsonb",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [],
+      "keys": [
+        [
+          "event_type"
+        ]
+      ]
+    },
+    "lifecycle_transition": {
+      "columns": [
+        {
+          "name": "from_status",
+          "type": "text",
+          "nullable": false,
+          "pk": true,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "event_type",
+          "type": "text",
+          "nullable": false,
+          "pk": true,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "to_status",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        }
+      ],
+      "constraints": [
+        "PRIMARY KEY (from_status, event_type)"
+      ],
+      "keys": [
+        [
+          "from_status",
+          "event_type"
+        ]
+      ]
+    },
+    "import_batch": {
+      "columns": [
+        {
+          "name": "batch_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "source_name",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "source_kind",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "vendor_id",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "sha256",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "uploaded_by",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "uploaded_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "source_timezone",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "artifact_uri",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [
+        "UNIQUE NULLS NOT DISTINCT (source_kind, vendor_id, sha256)"
+      ],
+      "keys": [
+        [
+          "batch_id"
+        ],
+        [
+          "source_kind",
+          "vendor_id",
+          "sha256"
+        ]
+      ]
+    },
+    "import_row": {
+      "columns": [
+        {
+          "name": "row_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "batch_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "sheet_name",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "row_number",
+          "type": "integer",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "raw_values",
+          "type": "jsonb",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [
+        "UNIQUE (batch_id, sheet_name, row_number)"
+      ],
+      "keys": [
+        [
+          "row_id"
+        ],
+        [
+          "batch_id",
+          "sheet_name",
+          "row_number"
+        ]
+      ]
+    },
+    "import_issue": {
+      "columns": [
+        {
+          "name": "issue_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "row_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "code",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "message",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "disposition",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "recorded_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [
+        "UNIQUE (row_id, code)"
+      ],
+      "keys": [
+        [
+          "issue_id"
+        ],
+        [
+          "row_id",
+          "code"
+        ]
+      ]
+    },
+    "carton": {
+      "columns": [
+        {
+          "name": "carton_id",
+          "type": "text",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "entity_id",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "department_id",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "owner_user_id",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "document_type",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "archival_policy",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "carton_created_date",
+          "type": "date",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "retention_trigger_date",
+          "type": "date",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "declared_file_count",
+          "type": "integer",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "assigned_vendor_id",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "barcode",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "remarks",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "source_row_id",
+          "type": "bigint",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": true
+        }
+      ],
+      "constraints": [
+        "FOREIGN KEY (entity_id, department_id) REFERENCES department (entity_id, department_id)",
+        "UNIQUE (carton_id, document_type)"
+      ],
+      "keys": [
+        [
+          "carton_id"
+        ],
+        [
+          "source_row_id"
+        ],
+        [
+          "carton_id",
+          "document_type"
+        ]
+      ]
+    },
+    "file_record": {
+      "columns": [
+        {
+          "name": "file_id",
+          "type": "text",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "carton_id",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "file_ref",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "document_type",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "file_description",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "document_year",
+          "type": "integer",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "contains_pii",
+          "type": "boolean",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "source_row_id",
+          "type": "bigint",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": true
+        }
+      ],
+      "constraints": [
+        "FOREIGN KEY (carton_id, document_type) REFERENCES carton (carton_id, document_type)"
+      ],
+      "keys": [
+        [
+          "file_id"
+        ],
+        [
+          "source_row_id"
+        ]
+      ]
+    },
+    "service_request": {
+      "columns": [
+        {
+          "name": "request_id",
+          "type": "text",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "carton_id",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "request_type",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "vendor_id",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "raised_by",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "raised_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "request_status",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "destination",
+          "type": "jsonb",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "vendor_ack_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "completed_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "approved_by",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "approved_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "rejection_reason",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "sla_rule_id",
+          "type": "bigint",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "sla_snapshot",
+          "type": "jsonb",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "sla_due_date",
+          "type": "date",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "source_row_id",
+          "type": "bigint",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": true
+        }
+      ],
+      "constraints": [
+        "UNIQUE (carton_id, request_id)",
+        "CHECK (approved_by IS NULL OR approved_by <> raised_by)",
+        "CHECK ((approved_by IS NULL) = (approved_at IS NULL))",
+        "CHECK (request_type = 'DESTRUCTION' OR approved_by IS NULL)",
+        "CHECK (vendor_ack_at IS NULL OR vendor_ack_at >= raised_at)",
+        "CHECK (completed_at IS NULL OR completed_at >= raised_at)",
+        "CHECK (approved_at IS NULL OR approved_at >= raised_at)",
+        "CHECK (request_status <> 'Rejected' OR NULLIF(btrim(rejection_reason), '') IS NOT NULL)"
+      ],
+      "keys": [
+        [
+          "request_id"
+        ],
+        [
+          "source_row_id"
+        ],
+        [
+          "carton_id",
+          "request_id"
+        ]
+      ]
+    },
+    "event_log": {
+      "columns": [
+        {
+          "name": "event_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "stream_kind",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "stream_id",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "stream_version",
+          "type": "bigint",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "carton_id",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "request_id",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "event_type",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "occurred_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "recorded_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "actor_user_id",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "actor_role",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "actor_reference",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "channel",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "source_event_id",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "source_row_id",
+          "type": "bigint",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "from_location_ref",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "to_location_ref",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "resulting_status",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "schema_version",
+          "type": "integer",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "payload",
+          "type": "jsonb",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "corrects_event_id",
+          "type": "bigint",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "idempotency_key",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": true
+        }
+      ],
+      "constraints": [
+        "UNIQUE (stream_kind, stream_id, stream_version)",
+        "UNIQUE (carton_id, event_id)",
+        "UNIQUE (source_row_id, event_type)",
+        "FOREIGN KEY (carton_id, request_id) REFERENCES service_request (carton_id, request_id)",
+        "CHECK ((stream_kind = 'CARTON' AND carton_id IS NOT NULL AND stream_id = carton_id) OR (stream_kind <> 'CARTON' AND carton_id IS NULL AND request_id IS NULL))",
+        "CHECK (channel IN ('UPLOAD', 'MIGRATION', 'SCHEDULER') OR actor_user_id IS NOT NULL)",
+        "CHECK (jsonb_typeof(payload) = 'object')"
+      ],
+      "keys": [
+        [
+          "event_id"
+        ],
+        [
+          "idempotency_key"
+        ],
+        [
+          "stream_kind",
+          "stream_id",
+          "stream_version"
+        ],
+        [
+          "carton_id",
+          "event_id"
+        ],
+        [
+          "source_row_id",
+          "event_type"
+        ]
+      ]
+    },
+    "carton_state": {
+      "columns": [
+        {
+          "name": "carton_id",
+          "type": "text",
+          "nullable": false,
+          "pk": true,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "status_code",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "custody",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "vendor_id",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "warehouse_id",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "active_hold_count",
+          "type": "integer",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "state_since",
+          "type": "timestamptz",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "last_event_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "version",
+          "type": "bigint",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "rebuilt_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [
+        "FOREIGN KEY (carton_id, last_event_id) REFERENCES event_log (carton_id, event_id)",
+        "FOREIGN KEY (vendor_id, warehouse_id) REFERENCES warehouse (vendor_id, location_id)",
+        "CHECK ((custody = 'WAREHOUSE' AND vendor_id IS NOT NULL AND warehouse_id IS NOT NULL) OR (custody <> 'WAREHOUSE' AND warehouse_id IS NULL))"
+      ],
+      "keys": [
+        [
+          "carton_id"
+        ]
+      ]
+    },
+    "custody_interval": {
+      "columns": [
+        {
+          "name": "interval_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "carton_id",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "custody",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "vendor_id",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "warehouse_id",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "valid_from",
+          "type": "timestamptz",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "valid_to",
+          "type": "timestamptz",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "start_event_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "end_event_id",
+          "type": "bigint",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        }
+      ],
+      "constraints": [
+        "FOREIGN KEY (carton_id, start_event_id) REFERENCES event_log (carton_id, event_id)",
+        "FOREIGN KEY (carton_id, end_event_id) REFERENCES event_log (carton_id, event_id)",
+        "FOREIGN KEY (vendor_id, warehouse_id) REFERENCES warehouse (vendor_id, location_id)",
+        "CHECK (valid_to IS NULL OR valid_to > valid_from)",
+        "CHECK ((valid_to IS NULL) = (end_event_id IS NULL))",
+        "CHECK ((custody = 'WAREHOUSE' AND vendor_id IS NOT NULL AND warehouse_id IS NOT NULL) OR (custody <> 'WAREHOUSE' AND warehouse_id IS NULL))",
+        "EXCLUDE USING gist (carton_id WITH OPERATOR(=), (tstzrange(valid_from, valid_to, '[)')) WITH OPERATOR(&&))"
+      ],
+      "keys": [
+        [
+          "interval_id"
+        ]
+      ]
+    },
+    "legal_hold": {
+      "columns": [
+        {
+          "name": "hold_id",
+          "type": "text",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "carton_id",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "matter_reference",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "raised_by",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "starts_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "start_precision",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "applied_event_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "released_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "release_precision",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "released_by",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "release_reason",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "released_event_id",
+          "type": "bigint",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "source_row_id",
+          "type": "bigint",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": true
+        }
+      ],
+      "constraints": [
+        "FOREIGN KEY (carton_id, applied_event_id) REFERENCES event_log (carton_id, event_id)",
+        "FOREIGN KEY (carton_id, released_event_id) REFERENCES event_log (carton_id, event_id)",
+        "CHECK (released_at IS NULL OR released_at >= starts_at)",
+        "CHECK ((released_at IS NULL AND released_event_id IS NULL AND release_precision IS NULL) OR (released_at IS NOT NULL AND released_event_id IS NOT NULL AND release_precision IS NOT NULL))"
+      ],
+      "keys": [
+        [
+          "hold_id"
+        ],
+        [
+          "source_row_id"
+        ]
+      ]
+    },
+    "vendor_declaration": {
+      "columns": [
+        {
+          "name": "declaration_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "batch_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "vendor_id",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "cycle",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "declared_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [
+        "UNIQUE (batch_id, vendor_id, cycle, declared_at)"
+      ],
+      "keys": [
+        [
+          "declaration_id"
+        ],
+        [
+          "batch_id",
+          "vendor_id",
+          "cycle",
+          "declared_at"
+        ]
+      ]
+    },
+    "vendor_declaration_item": {
+      "columns": [
+        {
+          "name": "declaration_item_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "declaration_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "carton_reference",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "declared_location_reference",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "declared_status",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "vendor_notes",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "facility_notes_as_received",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "source_row_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": true
+        }
+      ],
+      "constraints": [],
+      "keys": [
+        [
+          "declaration_item_id"
+        ],
+        [
+          "source_row_id"
+        ]
+      ]
+    },
+    "vendor_invoice": {
+      "columns": [
+        {
+          "name": "invoice_record_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "invoice_reference",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "vendor_id",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "billing_month",
+          "type": "date",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "invoice_date",
+          "type": "date",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "currency",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "declared_line_count",
+          "type": "integer",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "declared_subtotal",
+          "type": "numeric(18, 2)",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "declared_tax_rate",
+          "type": "numeric(7, 3)",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "declared_tax_amount",
+          "type": "numeric(18, 2)",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "declared_total",
+          "type": "numeric(18, 2)",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "declared_status",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "source_row_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": true
+        }
+      ],
+      "constraints": [],
+      "keys": [
+        [
+          "invoice_record_id"
+        ],
+        [
+          "source_row_id"
+        ]
+      ]
+    },
+    "vendor_invoice_line": {
+      "columns": [
+        {
+          "name": "invoice_line_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "invoice_record_id",
+          "type": "bigint",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "invoice_reference",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "line_number",
+          "type": "integer",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "line_type",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "activity_reference",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "carton_reference",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "request_reference",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "quantity",
+          "type": "numeric(18, 4)",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "unit_rate",
+          "type": "numeric(18, 4)",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "line_amount",
+          "type": "numeric(18, 2)",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "service_period_raw",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "service_month",
+          "type": "date",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "source_row_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": true
+        }
+      ],
+      "constraints": [],
+      "keys": [
+        [
+          "invoice_line_id"
+        ],
+        [
+          "source_row_id"
+        ]
+      ]
+    },
+    "certificate_evidence": {
+      "columns": [
+        {
+          "name": "certificate_row_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "certificate_reference",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "carton_reference",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "vendor_reference",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "destroyed_on",
+          "type": "date",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "destruction_location_reference",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "destruction_method",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "witnessed_by_reference",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "issued_on",
+          "type": "date",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "source_row_id",
+          "type": "bigint",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": true
+        },
+        {
+          "name": "evidence_event_id",
+          "type": "bigint",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "recorded_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [
+        "CHECK (source_row_id IS NOT NULL OR evidence_event_id IS NOT NULL)"
+      ],
+      "keys": [
+        [
+          "certificate_row_id"
+        ],
+        [
+          "source_row_id"
+        ]
+      ]
+    },
+    "reconciliation_run": {
+      "columns": [
+        {
+          "name": "run_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "run_kind",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "scope_key",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "input_fingerprint",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "parameters",
+          "type": "jsonb",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "rule_snapshot",
+          "type": "jsonb",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "engine_version",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "requested_by",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "started_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "finished_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "counts",
+          "type": "jsonb",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "error_summary",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [
+        "UNIQUE (run_kind, scope_key, input_fingerprint)",
+        "CHECK (finished_at IS NULL OR finished_at >= started_at)"
+      ],
+      "keys": [
+        [
+          "run_id"
+        ],
+        [
+          "run_kind",
+          "scope_key",
+          "input_fingerprint"
+        ]
+      ]
+    },
+    "expected_charge": {
+      "columns": [
+        {
+          "name": "expected_charge_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "run_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "charge_key",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "carton_id",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "vendor_id",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "department_id",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "service_month",
+          "type": "date",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "activity",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "request_id",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "source_event_id",
+          "type": "bigint",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "rate_id",
+          "type": "bigint",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "quantity",
+          "type": "numeric(18, 4)",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "applied_rate",
+          "type": "numeric(18, 4)",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "net_amount",
+          "type": "numeric(18, 2)",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "calculation_status",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "basis",
+          "type": "jsonb",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [
+        "UNIQUE (run_id, charge_key)",
+        "CHECK (calculation_status <> 'CALCULATED' OR (rate_id IS NOT NULL AND applied_rate IS NOT NULL AND net_amount IS NOT NULL))"
+      ],
+      "keys": [
+        [
+          "expected_charge_id"
+        ],
+        [
+          "run_id",
+          "charge_key"
+        ]
+      ]
+    },
+    "exception_case": {
+      "columns": [
+        {
+          "name": "exception_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "stable_key",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": true
+        },
+        {
+          "name": "exception_type",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "severity",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "owner_role",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "owner_user_id",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "owner_vendor_id",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "carton_id",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "subject_reference",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "visibility",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "first_detected_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "last_detected_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "first_observed_as_of",
+          "type": "timestamptz",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "last_observed_as_of",
+          "type": "timestamptz",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "resolution_reason",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "resolved_by",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "resolved_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "due_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [
+        "CHECK (last_detected_at >= first_detected_at)",
+        "CHECK (last_observed_as_of >= first_observed_as_of)",
+        "CHECK (status NOT IN ('RESOLVED', 'ACCEPTED_RISK') OR (resolved_at IS NOT NULL AND resolved_by IS NOT NULL AND NULLIF(btrim(resolution_reason), '') IS NOT NULL))"
+      ],
+      "keys": [
+        [
+          "exception_id"
+        ],
+        [
+          "stable_key"
+        ]
+      ]
+    },
+    "reconciliation_finding": {
+      "columns": [
+        {
+          "name": "finding_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "run_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "exception_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "finding_key",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "observed_as_of",
+          "type": "timestamptz",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "rule_code",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "rule_revision",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "evidence",
+          "type": "jsonb",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [
+        "UNIQUE (run_id, finding_key)"
+      ],
+      "keys": [
+        [
+          "finding_id"
+        ],
+        [
+          "run_id",
+          "finding_key"
+        ]
+      ]
+    },
+    "alert": {
+      "columns": [
+        {
+          "name": "alert_id",
+          "type": "bigint",
+          "nullable": false,
+          "pk": true,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "carton_id",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "alert_type",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "dedupe_key",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": true
+        },
+        {
+          "name": "owner_user_id",
+          "type": "text",
+          "nullable": true,
+          "pk": false,
+          "fk": true,
+          "unique": false
+        },
+        {
+          "name": "due_on",
+          "type": "date",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "basis",
+          "type": "jsonb",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "last_evaluated_at",
+          "type": "timestamptz",
+          "nullable": false,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        },
+        {
+          "name": "resolved_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "pk": false,
+          "fk": false,
+          "unique": false
+        }
+      ],
+      "constraints": [],
+      "keys": [
+        [
+          "alert_id"
+        ],
+        [
+          "dedupe_key"
+        ]
+      ]
+    }
+  },
+  "foreign_keys": [
+    {
+      "child": "department",
+      "parent": "business_entity",
+      "cols": [
+        "entity_id"
+      ],
+      "target": [
+        "entity_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "warehouse",
+      "parent": "vendor",
+      "cols": [
+        "vendor_id"
+      ],
+      "target": [
+        "vendor_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "app_user",
+      "parent": "business_entity",
+      "cols": [
+        "entity_id"
+      ],
+      "target": [
+        "entity_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "app_user",
+      "parent": "vendor",
+      "cols": [
+        "vendor_id"
+      ],
+      "target": [
+        "vendor_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "app_user",
+      "parent": "department",
+      "cols": [
+        "entity_id",
+        "department_id"
+      ],
+      "target": [
+        "entity_id",
+        "department_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "user_session",
+      "parent": "app_user",
+      "cols": [
+        "user_id"
+      ],
+      "target": [
+        "user_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "retention_policy",
+      "parent": "business_entity",
+      "cols": [
+        "entity_id"
+      ],
+      "target": [
+        "entity_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "retention_policy",
+      "parent": "document_type",
+      "cols": [
+        "document_type"
+      ],
+      "target": [
+        "document_type"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "retention_policy",
+      "parent": "archival_policy",
+      "cols": [
+        "archival_policy"
+      ],
+      "target": [
+        "archival_policy"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "vendor_rate",
+      "parent": "vendor",
+      "cols": [
+        "vendor_id"
+      ],
+      "target": [
+        "vendor_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "sla_rule",
+      "parent": "vendor",
+      "cols": [
+        "vendor_id"
+      ],
+      "target": [
+        "vendor_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "event_type",
+      "parent": "carton_status",
+      "cols": [
+        "resulting_status"
+      ],
+      "target": [
+        "status_code"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "lifecycle_transition",
+      "parent": "carton_status",
+      "cols": [
+        "from_status"
+      ],
+      "target": [
+        "status_code"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "lifecycle_transition",
+      "parent": "event_type",
+      "cols": [
+        "event_type"
+      ],
+      "target": [
+        "event_type"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "lifecycle_transition",
+      "parent": "carton_status",
+      "cols": [
+        "to_status"
+      ],
+      "target": [
+        "status_code"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "import_batch",
+      "parent": "vendor",
+      "cols": [
+        "vendor_id"
+      ],
+      "target": [
+        "vendor_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "import_batch",
+      "parent": "app_user",
+      "cols": [
+        "uploaded_by"
+      ],
+      "target": [
+        "user_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "import_row",
+      "parent": "import_batch",
+      "cols": [
+        "batch_id"
+      ],
+      "target": [
+        "batch_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "import_issue",
+      "parent": "import_row",
+      "cols": [
+        "row_id"
+      ],
+      "target": [
+        "row_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "carton",
+      "parent": "app_user",
+      "cols": [
+        "owner_user_id"
+      ],
+      "target": [
+        "user_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "carton",
+      "parent": "document_type",
+      "cols": [
+        "document_type"
+      ],
+      "target": [
+        "document_type"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "carton",
+      "parent": "archival_policy",
+      "cols": [
+        "archival_policy"
+      ],
+      "target": [
+        "archival_policy"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "carton",
+      "parent": "vendor",
+      "cols": [
+        "assigned_vendor_id"
+      ],
+      "target": [
+        "vendor_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "carton",
+      "parent": "import_row",
+      "cols": [
+        "source_row_id"
+      ],
+      "target": [
+        "row_id"
+      ],
+      "optional": true,
+      "one": true
+    },
+    {
+      "child": "carton",
+      "parent": "department",
+      "cols": [
+        "entity_id",
+        "department_id"
+      ],
+      "target": [
+        "entity_id",
+        "department_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "file_record",
+      "parent": "import_row",
+      "cols": [
+        "source_row_id"
+      ],
+      "target": [
+        "row_id"
+      ],
+      "optional": true,
+      "one": true
+    },
+    {
+      "child": "file_record",
+      "parent": "carton",
+      "cols": [
+        "carton_id",
+        "document_type"
+      ],
+      "target": [
+        "carton_id",
+        "document_type"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "service_request",
+      "parent": "carton",
+      "cols": [
+        "carton_id"
+      ],
+      "target": [
+        "carton_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "service_request",
+      "parent": "vendor",
+      "cols": [
+        "vendor_id"
+      ],
+      "target": [
+        "vendor_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "service_request",
+      "parent": "app_user",
+      "cols": [
+        "raised_by"
+      ],
+      "target": [
+        "user_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "service_request",
+      "parent": "app_user",
+      "cols": [
+        "approved_by"
+      ],
+      "target": [
+        "user_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "service_request",
+      "parent": "sla_rule",
+      "cols": [
+        "sla_rule_id"
+      ],
+      "target": [
+        "sla_rule_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "service_request",
+      "parent": "import_row",
+      "cols": [
+        "source_row_id"
+      ],
+      "target": [
+        "row_id"
+      ],
+      "optional": true,
+      "one": true
+    },
+    {
+      "child": "event_log",
+      "parent": "carton",
+      "cols": [
+        "carton_id"
+      ],
+      "target": [
+        "carton_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "event_log",
+      "parent": "event_type",
+      "cols": [
+        "event_type"
+      ],
+      "target": [
+        "event_type"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "event_log",
+      "parent": "app_user",
+      "cols": [
+        "actor_user_id"
+      ],
+      "target": [
+        "user_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "event_log",
+      "parent": "import_row",
+      "cols": [
+        "source_row_id"
+      ],
+      "target": [
+        "row_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "event_log",
+      "parent": "carton_status",
+      "cols": [
+        "resulting_status"
+      ],
+      "target": [
+        "status_code"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "event_log",
+      "parent": "event_log",
+      "cols": [
+        "corrects_event_id"
+      ],
+      "target": [
+        "event_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "event_log",
+      "parent": "service_request",
+      "cols": [
+        "carton_id",
+        "request_id"
+      ],
+      "target": [
+        "carton_id",
+        "request_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "carton_state",
+      "parent": "carton",
+      "cols": [
+        "carton_id"
+      ],
+      "target": [
+        "carton_id"
+      ],
+      "optional": false,
+      "one": true
+    },
+    {
+      "child": "carton_state",
+      "parent": "carton_status",
+      "cols": [
+        "status_code"
+      ],
+      "target": [
+        "status_code"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "carton_state",
+      "parent": "vendor",
+      "cols": [
+        "vendor_id"
+      ],
+      "target": [
+        "vendor_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "carton_state",
+      "parent": "event_log",
+      "cols": [
+        "carton_id",
+        "last_event_id"
+      ],
+      "target": [
+        "carton_id",
+        "event_id"
+      ],
+      "optional": false,
+      "one": true
+    },
+    {
+      "child": "carton_state",
+      "parent": "warehouse",
+      "cols": [
+        "vendor_id",
+        "warehouse_id"
+      ],
+      "target": [
+        "vendor_id",
+        "location_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "custody_interval",
+      "parent": "carton",
+      "cols": [
+        "carton_id"
+      ],
+      "target": [
+        "carton_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "custody_interval",
+      "parent": "vendor",
+      "cols": [
+        "vendor_id"
+      ],
+      "target": [
+        "vendor_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "custody_interval",
+      "parent": "event_log",
+      "cols": [
+        "carton_id",
+        "start_event_id"
+      ],
+      "target": [
+        "carton_id",
+        "event_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "custody_interval",
+      "parent": "event_log",
+      "cols": [
+        "carton_id",
+        "end_event_id"
+      ],
+      "target": [
+        "carton_id",
+        "event_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "custody_interval",
+      "parent": "warehouse",
+      "cols": [
+        "vendor_id",
+        "warehouse_id"
+      ],
+      "target": [
+        "vendor_id",
+        "location_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "legal_hold",
+      "parent": "carton",
+      "cols": [
+        "carton_id"
+      ],
+      "target": [
+        "carton_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "legal_hold",
+      "parent": "app_user",
+      "cols": [
+        "raised_by"
+      ],
+      "target": [
+        "user_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "legal_hold",
+      "parent": "app_user",
+      "cols": [
+        "released_by"
+      ],
+      "target": [
+        "user_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "legal_hold",
+      "parent": "import_row",
+      "cols": [
+        "source_row_id"
+      ],
+      "target": [
+        "row_id"
+      ],
+      "optional": true,
+      "one": true
+    },
+    {
+      "child": "legal_hold",
+      "parent": "event_log",
+      "cols": [
+        "carton_id",
+        "applied_event_id"
+      ],
+      "target": [
+        "carton_id",
+        "event_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "legal_hold",
+      "parent": "event_log",
+      "cols": [
+        "carton_id",
+        "released_event_id"
+      ],
+      "target": [
+        "carton_id",
+        "event_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "vendor_declaration",
+      "parent": "import_batch",
+      "cols": [
+        "batch_id"
+      ],
+      "target": [
+        "batch_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "vendor_declaration",
+      "parent": "vendor",
+      "cols": [
+        "vendor_id"
+      ],
+      "target": [
+        "vendor_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "vendor_declaration_item",
+      "parent": "vendor_declaration",
+      "cols": [
+        "declaration_id"
+      ],
+      "target": [
+        "declaration_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "vendor_declaration_item",
+      "parent": "import_row",
+      "cols": [
+        "source_row_id"
+      ],
+      "target": [
+        "row_id"
+      ],
+      "optional": false,
+      "one": true
+    },
+    {
+      "child": "vendor_invoice",
+      "parent": "vendor",
+      "cols": [
+        "vendor_id"
+      ],
+      "target": [
+        "vendor_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "vendor_invoice",
+      "parent": "import_row",
+      "cols": [
+        "source_row_id"
+      ],
+      "target": [
+        "row_id"
+      ],
+      "optional": false,
+      "one": true
+    },
+    {
+      "child": "vendor_invoice_line",
+      "parent": "vendor_invoice",
+      "cols": [
+        "invoice_record_id"
+      ],
+      "target": [
+        "invoice_record_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "vendor_invoice_line",
+      "parent": "import_row",
+      "cols": [
+        "source_row_id"
+      ],
+      "target": [
+        "row_id"
+      ],
+      "optional": false,
+      "one": true
+    },
+    {
+      "child": "certificate_evidence",
+      "parent": "import_row",
+      "cols": [
+        "source_row_id"
+      ],
+      "target": [
+        "row_id"
+      ],
+      "optional": true,
+      "one": true
+    },
+    {
+      "child": "certificate_evidence",
+      "parent": "event_log",
+      "cols": [
+        "evidence_event_id"
+      ],
+      "target": [
+        "event_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "reconciliation_run",
+      "parent": "app_user",
+      "cols": [
+        "requested_by"
+      ],
+      "target": [
+        "user_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "expected_charge",
+      "parent": "reconciliation_run",
+      "cols": [
+        "run_id"
+      ],
+      "target": [
+        "run_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "expected_charge",
+      "parent": "carton",
+      "cols": [
+        "carton_id"
+      ],
+      "target": [
+        "carton_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "expected_charge",
+      "parent": "vendor",
+      "cols": [
+        "vendor_id"
+      ],
+      "target": [
+        "vendor_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "expected_charge",
+      "parent": "department",
+      "cols": [
+        "department_id"
+      ],
+      "target": [
+        "department_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "expected_charge",
+      "parent": "service_request",
+      "cols": [
+        "request_id"
+      ],
+      "target": [
+        "request_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "expected_charge",
+      "parent": "event_log",
+      "cols": [
+        "source_event_id"
+      ],
+      "target": [
+        "event_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "expected_charge",
+      "parent": "vendor_rate",
+      "cols": [
+        "rate_id"
+      ],
+      "target": [
+        "rate_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "exception_case",
+      "parent": "app_user",
+      "cols": [
+        "owner_user_id"
+      ],
+      "target": [
+        "user_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "exception_case",
+      "parent": "vendor",
+      "cols": [
+        "owner_vendor_id"
+      ],
+      "target": [
+        "vendor_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "exception_case",
+      "parent": "carton",
+      "cols": [
+        "carton_id"
+      ],
+      "target": [
+        "carton_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "exception_case",
+      "parent": "app_user",
+      "cols": [
+        "resolved_by"
+      ],
+      "target": [
+        "user_id"
+      ],
+      "optional": true,
+      "one": false
+    },
+    {
+      "child": "reconciliation_finding",
+      "parent": "reconciliation_run",
+      "cols": [
+        "run_id"
+      ],
+      "target": [
+        "run_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "reconciliation_finding",
+      "parent": "exception_case",
+      "cols": [
+        "exception_id"
+      ],
+      "target": [
+        "exception_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "alert",
+      "parent": "carton",
+      "cols": [
+        "carton_id"
+      ],
+      "target": [
+        "carton_id"
+      ],
+      "optional": false,
+      "one": false
+    },
+    {
+      "child": "alert",
+      "parent": "app_user",
+      "cols": [
+        "owner_user_id"
+      ],
+      "target": [
+        "user_id"
+      ],
+      "optional": true,
+      "one": false
+    }
+  ],
+  "groups": {
+    "01_identity_organization": [
+      "business_entity",
+      "department",
+      "vendor",
+      "warehouse",
+      "app_user",
+      "user_session"
+    ],
+    "02_policy_configuration": [
+      "document_type",
+      "archival_policy",
+      "retention_policy",
+      "vendor_rate",
+      "sla_rule",
+      "holiday",
+      "threshold_rule",
+      "tax_rule"
+    ],
+    "03_lifecycle_reference": [
+      "carton_status",
+      "event_type",
+      "lifecycle_transition"
+    ],
+    "04_cartons_workflow": [
+      "carton",
+      "file_record",
+      "service_request",
+      "carton_state"
+    ],
+    "05_events_custody_holds": [
+      "event_log",
+      "custody_interval",
+      "legal_hold"
+    ],
+    "06_imports_vendor_evidence": [
+      "import_batch",
+      "import_row",
+      "import_issue",
+      "vendor_declaration",
+      "vendor_declaration_item",
+      "vendor_invoice",
+      "vendor_invoice_line",
+      "certificate_evidence"
+    ],
+    "07_reconciliation_alerts": [
+      "reconciliation_run",
+      "expected_charge",
+      "exception_case",
+      "reconciliation_finding",
+      "alert"
+    ]
+  }
+}

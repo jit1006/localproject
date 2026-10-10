@@ -1,0 +1,16 @@
+digraph schema {
+graph [rankdir=TB, bgcolor="#f6f8fc", pad=0.5, nodesep=0.55, ranksep=1.0, splines=polyline, fontname="DejaVu Sans", label="03 Lifecycle Reference\nPK = primary key | FK = foreign key | ? = nullable\nEdges: referencing table to referenced table. Cross-module FKs are listed in the dictionary.", labelloc=t, fontsize=20];
+node [shape=plain,fontname="DejaVu Sans"];
+edge [color="#7893ad",arrowsize=0.65,fontname="DejaVu Sans",fontsize=9];
+"carton_status" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#d8e0eb" BGCOLOR="white"><TR><TD COLSPAN="3" BGCOLOR="#12344d"><FONT COLOR="white"><B>carton_status</B></FONT></TD></TR><TR><TD ALIGN="LEFT">PK</TD><TD ALIGN="LEFT">status_code</TD><TD ALIGN="LEFT"><FONT COLOR="#526475">text</FONT></TD></TR><TR><TD ALIGN="LEFT"></TD><TD ALIGN="LEFT">meaning</TD><TD ALIGN="LEFT"><FONT COLOR="#526475">text</FONT></TD></TR><TR><TD ALIGN="LEFT"></TD><TD ALIGN="LEFT">is_terminal</TD><TD ALIGN="LEFT"><FONT COLOR="#526475">boolean</FONT></TD></TR></TABLE>>];
+"event_type" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#d8e0eb" BGCOLOR="white"><TR><TD COLSPAN="3" BGCOLOR="#12344d"><FONT COLOR="white"><B>event_type</B></FONT></TD></TR><TR><TD ALIGN="LEFT">PK</TD><TD ALIGN="LEFT">event_type</TD><TD ALIGN="LEFT"><FONT COLOR="#526475">text</FONT></TD></TR><TR><TD ALIGN="LEFT"></TD><TD ALIGN="LEFT">meaning</TD><TD ALIGN="LEFT"><FONT COLOR="#526475">text</FONT></TD></TR><TR><TD ALIGN="LEFT"></TD><TD ALIGN="LEFT">changes_custody</TD><TD ALIGN="LEFT"><FONT COLOR="#526475">boolean</FONT></TD></TR><TR><TD ALIGN="LEFT"></TD><TD ALIGN="LEFT">expected_role ?</TD><TD ALIGN="LEFT"><FONT COLOR="#526475">text</FONT></TD></TR><TR><TD ALIGN="LEFT">FK</TD><TD ALIGN="LEFT">resulting_status ?</TD><TD ALIGN="LEFT"><FONT COLOR="#526475">text</FONT></TD></TR><TR><TD ALIGN="LEFT"></TD><TD ALIGN="LEFT">request_requirement</TD><TD ALIGN="LEFT"><FONT COLOR="#526475">text</FONT></TD></TR><TR><TD ALIGN="LEFT"></TD><TD ALIGN="LEFT">source_definition</TD><TD ALIGN="LEFT"><FONT COLOR="#526475">jsonb</FONT></TD></TR></TABLE>>];
+"lifecycle_transition" [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#d8e0eb" BGCOLOR="white"><TR><TD COLSPAN="3" BGCOLOR="#12344d"><FONT COLOR="white"><B>lifecycle_transition</B></FONT></TD></TR><TR><TD ALIGN="LEFT">PK FK</TD><TD ALIGN="LEFT">from_status</TD><TD ALIGN="LEFT"><FONT COLOR="#526475">text</FONT></TD></TR><TR><TD ALIGN="LEFT">PK FK</TD><TD ALIGN="LEFT">event_type</TD><TD ALIGN="LEFT"><FONT COLOR="#526475">text</FONT></TD></TR><TR><TD ALIGN="LEFT">FK</TD><TD ALIGN="LEFT">to_status</TD><TD ALIGN="LEFT"><FONT COLOR="#526475">text</FONT></TD></TR></TABLE>>];
+{rank=same;"carton_status";"event_type";}
+"carton_status" -> "event_type" [style=invis,weight=100];
+{rank=same;"lifecycle_transition";}
+"carton_status" -> "lifecycle_transition" [style=invis,weight=100];
+"event_type" -> "carton_status" [constraint=false,label="resulting_status"];
+"lifecycle_transition" -> "carton_status" [constraint=false,label="from_status"];
+"lifecycle_transition" -> "event_type" [constraint=false,label="event_type"];
+"lifecycle_transition" -> "carton_status" [constraint=false,label="to_status"];
+}

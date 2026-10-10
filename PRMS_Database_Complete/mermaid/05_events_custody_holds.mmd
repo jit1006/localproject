@@ -1,0 +1,58 @@
+erDiagram
+    direction TB
+    EVENT_LOG {
+        bigint event_id PK
+        text stream_kind
+        text stream_id
+        bigint stream_version
+        text carton_id FK
+        text request_id FK
+        text event_type FK
+        timestamptz occurred_at
+        timestamptz recorded_at
+        text actor_user_id FK
+        text actor_role
+        text actor_reference
+        text channel
+        text source_event_id
+        bigint source_row_id FK
+        text from_location_ref
+        text to_location_ref
+        text resulting_status FK
+        integer schema_version
+        jsonb payload
+        bigint corrects_event_id FK
+        text idempotency_key UK
+    }
+    CUSTODY_INTERVAL {
+        bigint interval_id PK
+        text carton_id FK
+        text custody
+        text vendor_id FK
+        text warehouse_id FK
+        timestamptz valid_from
+        timestamptz valid_to
+        bigint start_event_id FK
+        bigint end_event_id FK
+    }
+    LEGAL_HOLD {
+        text hold_id PK
+        text carton_id FK
+        text matter_reference
+        text reason
+        text raised_by FK
+        timestamptz starts_at
+        text start_precision
+        bigint applied_event_id FK
+        timestamptz released_at
+        text release_precision
+        text released_by FK
+        text release_reason
+        bigint released_event_id FK
+        bigint source_row_id FK, UK
+    }
+    EVENT_LOG o|--o{ EVENT_LOG : "corrects_event_id"
+    EVENT_LOG ||--o{ CUSTODY_INTERVAL : "carton_id, start_event_id"
+    EVENT_LOG o|--o{ CUSTODY_INTERVAL : "carton_id, end_event_id"
+    EVENT_LOG ||--o{ LEGAL_HOLD : "carton_id, applied_event_id"
+    EVENT_LOG o|--o{ LEGAL_HOLD : "carton_id, released_event_id"

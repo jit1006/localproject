@@ -1,0 +1,52 @@
+erDiagram
+    direction TB
+    BUSINESS_ENTITY {
+        text entity_id PK
+        text entity_name UK
+    }
+    DEPARTMENT {
+        text department_id PK
+        text entity_id FK
+        text department_name
+    }
+    VENDOR {
+        text vendor_id PK
+        text vendor_name
+        text status
+        date contract_start
+        text contract_ref
+        text ops_contact_email
+        text recertification_frequency
+    }
+    WAREHOUSE {
+        text location_id PK
+        text vendor_id FK
+        text location_name
+        text city
+        integer capacity_cartons
+    }
+    APP_USER {
+        text user_id PK
+        text full_name
+        text email
+        text role_code
+        text entity_id FK
+        text department_id FK
+        text vendor_id FK
+        text password_hash
+        boolean is_active
+        timestamptz created_at
+    }
+    USER_SESSION {
+        text token_hash PK
+        text user_id FK
+        timestamptz created_at
+        timestamptz expires_at
+        timestamptz revoked_at
+    }
+    BUSINESS_ENTITY ||--o{ DEPARTMENT : "entity_id"
+    VENDOR ||--o{ WAREHOUSE : "vendor_id"
+    BUSINESS_ENTITY o|--o{ APP_USER : "entity_id"
+    VENDOR o|--o{ APP_USER : "vendor_id"
+    DEPARTMENT o|--o{ APP_USER : "entity_id, department_id"
+    APP_USER ||--o{ USER_SESSION : "user_id"

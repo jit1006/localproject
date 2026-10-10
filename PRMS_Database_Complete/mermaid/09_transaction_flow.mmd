@@ -1,0 +1,25 @@
+flowchart TD
+    A["Authenticate active user"]
+    B["Authorize role, scope and requested action"]
+    C["BEGIN transaction - lock carton row"]
+    D["Check idempotency key and expected version"]
+    E["Already committed with same payload?"]
+    F["End transaction; return original result"]
+    G["Validate transition, custody, retention and holds"]
+    H["Append event with actor and request evidence"]
+    I["Update state, request, hold and custody projections"]
+    J["COMMIT all writes together"]
+    K["Return result to client"]
+    R["ROLLBACK and return clear error"]
+    A --> B
+    B -->|"Allowed"| C
+    B -->|"Denied"| R
+    C --> D
+    D --> E
+    E -->|"Yes"| F
+    E -->|"No"| G
+    G -->|"Valid"| H
+    G -->|"Invalid"| R
+    H --> I
+    I --> J
+    J --> K

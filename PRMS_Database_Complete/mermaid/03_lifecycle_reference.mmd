@@ -1,0 +1,25 @@
+erDiagram
+    direction TB
+    CARTON_STATUS {
+        text status_code PK
+        text meaning
+        boolean is_terminal
+    }
+    EVENT_TYPE {
+        text event_type PK
+        text meaning
+        boolean changes_custody
+        text expected_role
+        text resulting_status FK
+        text request_requirement
+        jsonb source_definition
+    }
+    LIFECYCLE_TRANSITION {
+        text from_status PK, FK
+        text event_type PK, FK
+        text to_status FK
+    }
+    CARTON_STATUS o|--o{ EVENT_TYPE : "resulting_status"
+    CARTON_STATUS ||--o{ LIFECYCLE_TRANSITION : "from_status"
+    EVENT_TYPE ||--o{ LIFECYCLE_TRANSITION : "event_type"
+    CARTON_STATUS ||--o{ LIFECYCLE_TRANSITION : "to_status"

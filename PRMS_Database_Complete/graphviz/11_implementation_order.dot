@@ -1,0 +1,28 @@
+digraph flow {
+graph [rankdir=TB,bgcolor="#f6f8fc",pad=0.4,nodesep=0.7,ranksep=0.7,fontname="DejaVu Sans",fontsize=22,labelloc=t,label="Database implementation order"];
+node [shape=box,style="rounded,filled",fillcolor="white",color="#a9bed2",fontname="DejaVu Sans",fontsize=13,margin="0.25,0.17"];
+edge [fontname="DejaVu Sans",fontsize=11,color="#547995"];
+A [label="Install PostgreSQL and create empty development database"];
+B [label="Apply 01_schema.sql"];
+C [label="Apply 02_seed_reference.sql"];
+D [label="Run 04_constraint_checks.sql"];
+E [label="Provision non-owner runtime login and apply grants"];
+F [label="Build authentication and scoped queries"];
+G [label="Implement event append / replay transaction"];
+H [label="Prove carton creation and pickup receipt"];
+I [label="Add retrieval, return, holds and destruction"];
+J [label="Implement operational importer and reconciliation"];
+K [label="Test direct API misuse, retries and concurrency"];
+L [label="Clean-install rehearsal and demo release"];
+A -> B [label=""];
+B -> C [label=""];
+C -> D [label=""];
+D -> E [label=""];
+E -> F [label=""];
+F -> G [label=""];
+G -> H [label=""];
+H -> I [label=""];
+I -> J [label=""];
+J -> K [label=""];
+K -> L [label=""];
+}

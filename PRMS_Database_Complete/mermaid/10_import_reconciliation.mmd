@@ -1,0 +1,31 @@
+flowchart TD
+    A["Upload source artifact"]
+    B["Hash file and reuse identical import"]
+    C["Preserve every source row"]
+    D["Normalize known formats and references"]
+    E["Map valid internal data; retain rejected rows with issues"]
+    F["Replay event history and compare cached state"]
+    G["Keep vendor evidence separate"]
+    H["Facilities selects artifact / period and runs reconciliation"]
+    I["Inventory: compare as-of custody with declaration"]
+    J["Invoice: self-check then compare independent costs"]
+    K["Certificate: compare request, event and hold history"]
+    L["Reuse unchanged run fingerprint"]
+    M["Upsert stable exception case and append finding"]
+    N["Owner investigates; resolve with reason and evidence"]
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+    D -->|"Vendor rows"| G
+    F --> H
+    G --> H
+    H -->|"Same inputs"| L
+    H -->|"Inventory"| I
+    H -->|"Invoice"| J
+    H -->|"Certificate"| K
+    I --> M
+    J --> M
+    K --> M
+    M --> N

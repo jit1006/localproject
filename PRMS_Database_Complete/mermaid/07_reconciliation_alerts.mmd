@@ -1,0 +1,82 @@
+erDiagram
+    direction TB
+    RECONCILIATION_RUN {
+        bigint run_id PK
+        text run_kind
+        text scope_key
+        text input_fingerprint
+        jsonb parameters
+        jsonb rule_snapshot
+        text engine_version
+        text requested_by FK
+        timestamptz started_at
+        timestamptz finished_at
+        text status
+        jsonb counts
+        text error_summary
+    }
+    EXPECTED_CHARGE {
+        bigint expected_charge_id PK
+        bigint run_id FK
+        text charge_key
+        text carton_id FK
+        text vendor_id FK
+        text department_id FK
+        date service_month
+        text activity
+        text request_id FK
+        bigint source_event_id FK
+        bigint rate_id FK
+        numeric quantity
+        numeric applied_rate
+        numeric net_amount
+        text calculation_status
+        jsonb basis
+    }
+    EXCEPTION_CASE {
+        bigint exception_id PK
+        text stable_key UK
+        text exception_type
+        text severity
+        text owner_role
+        text owner_user_id FK
+        text owner_vendor_id FK
+        text carton_id FK
+        text subject_reference
+        text visibility
+        timestamptz first_detected_at
+        timestamptz last_detected_at
+        timestamptz first_observed_as_of
+        timestamptz last_observed_as_of
+        text status
+        text resolution_reason
+        text resolved_by FK
+        timestamptz resolved_at
+        timestamptz due_at
+    }
+    RECONCILIATION_FINDING {
+        bigint finding_id PK
+        bigint run_id FK
+        bigint exception_id FK
+        text finding_key
+        timestamptz observed_as_of
+        text rule_code
+        text rule_revision
+        jsonb evidence
+    }
+    ALERT {
+        bigint alert_id PK
+        text carton_id FK
+        text alert_type
+        text dedupe_key UK
+        text owner_user_id FK
+        date due_on
+        text state
+        jsonb basis
+        timestamptz created_at
+        timestamptz last_evaluated_at
+        timestamptz resolved_at
+    }
+    RECONCILIATION_RUN ||--o{ EXPECTED_CHARGE : "run_id"
+    RECONCILIATION_RUN ||--o{ RECONCILIATION_FINDING : "run_id"
+    EXCEPTION_CASE ||--o{ RECONCILIATION_FINDING : "exception_id"

@@ -1,0 +1,29 @@
+digraph flow {
+graph [rankdir=TB,bgcolor="#f6f8fc",pad=0.4,nodesep=0.7,ranksep=0.7,fontname="DejaVu Sans",fontsize=22,labelloc=t,label="Atomic command and event transaction"];
+node [shape=box,style="rounded,filled",fillcolor="white",color="#a9bed2",fontname="DejaVu Sans",fontsize=13,margin="0.25,0.17"];
+edge [fontname="DejaVu Sans",fontsize=11,color="#547995"];
+A [label="Authenticate active user"];
+B [label="Authorize role, scope and requested action"];
+C [label="BEGIN transaction - lock carton row"];
+D [label="Check idempotency key and expected version"];
+E [label="Already committed with same payload?"];
+F [label="End transaction; return original result"];
+G [label="Validate transition, custody, retention and holds"];
+H [label="Append event with actor and request evidence"];
+I [label="Update state, request, hold and custody projections"];
+J [label="COMMIT all writes together"];
+K [label="Return result to client"];
+R [label="ROLLBACK and return clear error",fillcolor="#ffe8e2"];
+A -> B [label=""];
+B -> C [label="Allowed"];
+B -> R [label="Denied"];
+C -> D [label=""];
+D -> E [label=""];
+E -> F [label="Yes"];
+E -> G [label="No"];
+G -> H [label="Valid"];
+G -> R [label="Invalid"];
+H -> I [label=""];
+I -> J [label=""];
+J -> K [label=""];
+}
